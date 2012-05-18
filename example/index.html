@@ -12,8 +12,15 @@
 
     <style>
         #editor {
-            margin-top: 50px;
+            margin-top: 250px;
             margin-left: 50px;
+        }
+        #example {
+            display: block;
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 300px;
         }
 
         .inlet_slider {
@@ -43,6 +50,7 @@
 </head>
 
 <body>
+    <div id="example">dt = 0.1</div>
     <div id='editor'></div>
 
     <script src="lib/jquery-1.7.min.js"></script>
@@ -62,10 +70,18 @@
     <script>
         var editor = CodeMirror(document.getElementById("editor"),{
             //default code for example:
-            value: 'var x = 100;\n\nvar color = "#ffffff"\n\nvar dt = 0.1;',
+            value: 'var x = 100;\nvar y = 100;\nvar color = "#9FECAF"\n\nvar dt = 0.1;',
             mode:  "javascript",
             theme: "monokai",
-            lineNumbers: true
+            lineNumbers: true,
+            onChange: function() {
+                //let's affect the page when the code changes!
+                eval(editor.getValue());
+                $('#example').html("dt = " + dt);
+                $('#example').css('left', x+"px");
+                $('#example').css('top', y+"px");
+                $('#example').css('background-color', color);
+            }
         });
  
         var inlet = Inlet(editor);

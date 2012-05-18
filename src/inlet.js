@@ -1,13 +1,11 @@
 var Inlet = (function() {
-    var editor;
-    var slider;
-    var picker;
-
-    function Inlet(ed) {
-        editor = ed;
+    function inlet(ed) {
+        var editor = ed;
+        var slider;
+        var picker;
         
         var wrapper = editor.getWrapperElement();
-        $(wrapper).on("mousedown", Inlet.onClick);
+        $(wrapper).on("mousedown", onClick);
 
         //make the slider
         var slider_node = document.createElement("div");
@@ -43,93 +41,83 @@ var Inlet = (function() {
             }
         });
 
+        //Handle clicks
+        //inlet.onClick = function(ev) {
+        function onClick(ev) {
+            //This is where we figure out if we want to show the slider or not
 
-    }
+            //TODO: add check for modifier key (for now we just turn on click functionality
+            //no matter what
+            var cursor = editor.getCursor(true);
+            var token = editor.getTokenAt(cursor);
+            cursorOffset = editor.cursorCoords(true, "page");
+            if(token.className === "number") {
+                //parse the number out
+                var value = parseFloat(token.string);
+                var sliderRange;
+                //console.log("token", token, value);
 
-    //editor getter-setter
-    Inlet.editor = function(val) { 
-        if (!arguments.length) { return editor; }
-        editor = val;
-        return Inlet;
-    };
+                // this comes from water project:
+                // set the slider params based on the token's numeric value
+                if (value === 0) { 
+                    sliderRange = [-100, 100];
+                } else {
+                    sliderRange = [-value * 3, value * 5];
+                }
 
-    //Handle clicks
-    Inlet.onClick = function(ev) {
-        //This is where we figure out if we want to show the slider or not
-        console.log("hey!");
+                var slider_min = _.min(sliderRange);
+                var slider_max = _.max(sliderRange);
+                slider.slider('option', 'min', slider_min);
+                slider.slider('option', 'max', slider_max);
 
-        //TODO: add check for modifier key (for now we just turn on click functionality
-        //no matter what
-        var cursor = editor.getCursor(true);
-        var token = editor.getTokenAt(cursor);
-        cursorOffset = editor.cursorCoords(true, "page");
-        if(token.className === "number") {
-            //parse the number out
-            var value = parseFloat(token.string);
-            var sliderRange;
-            //console.log("token", token, value);
+                // slider range needs to be evenly divisible by the step
+                if ((slider_max - slider_min) > 20) {
+                    slider.slider('option', 'step', 1);
+                } else {
+                    slider.slider('option', 'step', (slider_max - slider_min)/200);
+                }
+                slider.slider('option', 'value', value);
 
-            // this comes from water project:
-            // set the slider params based on the token's numeric value
-            if (value === 0) { 
-                sliderRange = [-100, 100];
+                //setup slider position
+                // position slider centered above the cursor
+                //TODO: take in y_offset as a parameter
+                var y_offset = 15;
+                var sliderTop = cursorOffset.y - y_offset;
+                var sliderLeft = cursorOffset.x - slider.width()/2;
+
+                slider.offset({top: sliderTop - 10, left: sliderLeft});
+
+                slider.css('visibility', 'visible');
+                picker.element.style.display = "none";
+
+            //else if #use regex to check for color
             } else {
-                sliderRange = [-value * 3, value * 5];
+                var match = token.string.match(/["']#?(([a-fA-F0-9]){3}){1,2}["']/);
+                if(match) {
+                    //turn on color picker
+                    //console.log(token.string, match)
+                    var color = match[0];
+                    color = color.slice(2, color.length-1);
+                    picker.update(color);
+
+                    //TODO: make positioning of color picker configurable
+                    var top = cursorOffset.y - 210 + "px";
+                    var left = cursorOffset.x - 75 + "px";
+                    $("#ColorPicker").css('position', "absolute");
+                    $("#ColorPicker").css('top', top);
+                    $("#ColorPicker").css('left', left);
+                    //$('#ColorPicker').offset({top: 10, left: 100})
+                    //@picker.element.style.top = cursorOffset.top + "px"
+                    //@picker.element.style.left = cursorOffset.left + "px"
+                    //@picker.element.style.display = ""
+                    picker.toggle(true);
+                } else {
+                    //@picker.element.style.display = "none"
+                    picker.toggle(false);
+                }
+                slider.css('visibility', 'hidden');
             }
-
-            var slider_min = _.min(sliderRange);
-            var slider_max = _.max(sliderRange);
-            slider.slider('option', 'min', slider_min);
-            slider.slider('option', 'max', slider_max);
-
-            // slider range needs to be evenly divisible by the step
-            if ((slider_max - slider_min) > 20) {
-                slider.slider('option', 'step', 1);
-            } else {
-                slider.slider('option', 'step', (slider_max - slider_min)/200);
-            }
-            slider.slider('option', 'value', value);
-
-            //setup slider position
-            // position slider centered above the cursor
-            //TODO: take in y_offset as a parameter
-            var y_offset = 15;
-            var sliderTop = cursorOffset.y - y_offset;
-            var sliderLeft = cursorOffset.x - slider.width()/2;
-
-            slider.offset({top: sliderTop - 10, left: sliderLeft});
-
-            slider.css('visibility', 'visible');
-            picker.element.style.display = "none";
-
-        //else if #use regex to check for color
-        } else {
-            var match = token.string.match(/["']#?(([a-fA-F0-9]){3}){1,2}["']/);
-            if(match) {
-                console.log("match!");
-                //turn on color picker
-                //console.log(token.string, match)
-                var color = match[0];
-                color = color.slice(2, color.length-1);
-                picker.update(color);
-
-                //TODO: make positioning of color picker configurable
-                top = cursorOffset.y - 210 + "px";
-                left = cursorOffset.x - 75 + "px";
-                $("#ColorPicker").css('top', top);
-                $("#ColorPicker").css('left', left);
-                //$('#ColorPicker').offset({top: 10, left: 100})
-                //@picker.element.style.top = cursorOffset.top + "px"
-                //@picker.element.style.left = cursorOffset.left + "px"
-                //@picker.element.style.display = ""
-                picker.toggle(true);
-            } else {
-                //@picker.element.style.display = "none"
-                picker.toggle(false);
-            }
-            slider.css('visibility', 'hidden');
         }
-    };
-
-    return Inlet;
+    }
+    return inlet;
 })();
