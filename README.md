@@ -12,7 +12,6 @@ The [Color Picker library](https://github.com/mudcube/Color-Picker)
 
 This project is used in enjalot's [Tributary](http://mainstem.org)  
 
-We code things like this (and with this) at http://visual.ly/about/jobs
 
 # Usage
 
