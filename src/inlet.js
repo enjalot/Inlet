@@ -66,8 +66,11 @@ var Inlet = (function() {
                     sliderRange = [-value * 3, value * 5];
                 }
 
-                var slider_min = _.min(sliderRange);
-                var slider_max = _.max(sliderRange);
+                
+                //var slider_min = _.min(sliderRange);
+                var slider_min = sliderRange[0] < sliderRange[1]? sliderRange[0]: sliderRange[1];
+                var slider_max = sliderRange[0] > sliderRange[1]? sliderRange[0]: sliderRange[1];
+                //var slider_max = _.max(sliderRange);
                 slider.slider('option', 'min', slider_min);
                 slider.slider('option', 'max', slider_max);
 

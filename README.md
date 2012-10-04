@@ -10,18 +10,17 @@ The the slider code is adapted from Gabriel Florit's [Water project](http://gabr
 
 The [Color Picker library](https://github.com/mudcube/Color-Picker)  
 
-This project is used in enjalot's [Tributary](http://mainstem.org)  
+This project is used in enjalot's [Tributary](http://enjalot.com)  
 
 
 # Usage
 
 All you need is the inlet.js file from src/inlet.js  
 but you do need to make sure you have all of the libs this depends on (found in the example/lib folder):
-jQuery
-jQuery UI & slider
-ColorPicker
-underscore
-CodeMirror2 ( >= 2.24 )
+jQuery  
+jQuery UI & slider  
+ColorPicker  
+CodeMirror2 ( >= 2.24 )  
 
 You probably already use these in your project (with the exception of maybe ColorPicker or jQuery UI)  
 Check out example/index.html to see how to put things together
