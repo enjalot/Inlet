@@ -3,8 +3,8 @@
 <head>
     <meta charset='utf-8' />
 
-    <link rel="stylesheet" href="lib/CodeMirror2/lib/codemirror.css">
-    <link rel="stylesheet" href="lib/CodeMirror2/theme/monokai.css">
+    <link rel="stylesheet" href="lib/CodeMirror3/lib/codemirror.css">
+    <link rel="stylesheet" href="lib/CodeMirror3/theme/monokai.css">
 
     <link rel='stylesheet' type='text/css' href='lib/slider/css/humanity/jquery-ui-slider.css' />
 
@@ -61,27 +61,28 @@
     <script src="lib/colorpicker/Color.Picker.Classic.js" type="text/javascript"></script> 
     <script src="lib/colorpicker/Color.Space.js" type="text/javascript"></script> 
 
-    <script src="lib/CodeMirror2/lib/codemirror.js"></script>
-    <script src="lib/CodeMirror2/mode/javascript/javascript.js"></script>
+    <script src="lib/CodeMirror3/lib/codemirror.js"></script>
+    <script src="lib/CodeMirror3/mode/javascript/javascript.js"></script>
 
     <script src="../src/inlet.js"></script>
 
     <script>
         var editor = CodeMirror(document.getElementById("editor"),{
-            //default code for example:
-            value: 'var x = 100;\nvar y = 100;\nvar color = "#9FECAF"\n\nvar dt = 0.1;',
-            mode:  "javascript",
-            theme: "monokai",
-            lineNumbers: true,
-            onChange: function() {
-                //let's affect the page when the code changes!
-                eval(editor.getValue());
-                $('#example').html("dt = " + dt);
-                $('#example').css('left', x+"px");
-                $('#example').css('top', y+"px");
-                $('#example').css('background-color', color);
-            }
+          //default code for example:
+          value: 'var x = 100;\nvar y = 100;\nvar color = "#9FECAF"\n\nvar dt = 0.1;',
+          mode:  "javascript",
+          theme: "monokai",
+          lineNumbers: true,
         });
+        editor.on("change", function() {
+          //let's affect the page when the code changes!
+          eval(editor.getValue());
+          $('#example').html("dt = " + dt);
+          $('#example').css('left', x+"px");
+          $('#example').css('top', y+"px");
+          $('#example').css('background-color', color);
+        })
+
  
         var inlet = Inlet(editor);
     </script>
