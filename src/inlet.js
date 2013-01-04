@@ -38,7 +38,10 @@ var Inlet = (function() {
                 //console.log("SLIDING", ui.value+"", token.start, token.end)
                 var start = {"line":cursor.line, "ch":token.start};
                 var end = {"line":cursor.line, "ch":token.end};
-                editor.replaceRange('"#' + newcolor.toUpperCase() + '"', start, end);
+                start.ch = start.ch + token.string.indexOf("#");
+                end.ch = start.ch + token.string.length;
+                //editor.replaceRange('"#' + newcolor.toUpperCase() + '"', start, end);
+                editor.replaceRange('#' + newcolor.toUpperCase(), start, end);
             }
         });
 
@@ -66,11 +69,8 @@ var Inlet = (function() {
                     sliderRange = [-value * 3, value * 5];
                 }
 
-                
-                //var slider_min = _.min(sliderRange);
-                var slider_min = sliderRange[0] < sliderRange[1]? sliderRange[0]: sliderRange[1];
-                var slider_max = sliderRange[0] > sliderRange[1]? sliderRange[0]: sliderRange[1];
-                //var slider_max = _.max(sliderRange);
+                var slider_min = _.min(sliderRange);
+                var slider_max = _.max(sliderRange);
                 slider.slider('option', 'min', slider_min);
                 slider.slider('option', 'max', slider_max);
 
@@ -86,8 +86,8 @@ var Inlet = (function() {
                 // position slider centered above the cursor
                 //TODO: take in y_offset as a parameter
                 var y_offset = 15;
-                var sliderTop = cursorOffset.y - y_offset;
-                var sliderLeft = cursorOffset.x - slider.width()/2;
+                var sliderTop = cursorOffset.top - y_offset;
+                var sliderLeft = cursorOffset.left - slider.width()/2;
 
                 slider.offset({top: sliderTop - 10, left: sliderLeft});
 
@@ -96,17 +96,18 @@ var Inlet = (function() {
 
             //else if #use regex to check for color
             } else {
-                var match = token.string.match(/["']#?(([a-fA-F0-9]){3}){1,2}["']/);
+                //var match = token.string.match(/["']#?(([a-fA-F0-9]){3}){1,2}["']/);
+                var match = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/);
                 if(match) {
                     //turn on color picker
                     //console.log(token.string, match)
                     var color = match[0];
-                    color = color.slice(2, color.length-1);
+                    color = color.slice(1, color.length);
                     picker.update(color);
 
                     //TODO: make positioning of color picker configurable
-                    var top = cursorOffset.y - 210 + "px";
-                    var left = cursorOffset.x - 75 + "px";
+                    var top = cursorOffset.top - 210 + "px";
+                    var left = cursorOffset.left - 75 + "px";
                     $("#ColorPicker").css('position', "absolute");
                     $("#ColorPicker").css('top', top);
                     $("#ColorPicker").css('left', left);
