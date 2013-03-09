@@ -6,6 +6,8 @@ var Inlet = (function() {
     
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
+    //wrapper.addEventListener("keydown", onKeyDown);
+    editor.setOption("onKeyEvent", onKeyDown);
 
     //make the slider
     var sliderDiv = document.createElement("div");
@@ -15,6 +17,8 @@ var Inlet = (function() {
     sliderDiv.style.position = "absolute";
     sliderDiv.style.top = 0;
     wrapper.parentNode.appendChild(sliderDiv);
+    //TODO: figure out how to capture key events when slider has focus
+    //sliderDiv.addEventListener("keydown", onKeyDown);
     
     var slider = document.createElement("input");
     slider.className = "range";
@@ -23,20 +27,50 @@ var Inlet = (function() {
     //slider.style.width = "inherit";
     sliderDiv.appendChild(slider);
     
+    //we keep track where the last slide cursor was set;
+    var slideCursor;
+    
     function onSlide(event) {
-      var value = String(this.value);
-      var cursor = editor.getCursor();
+      var value = String(slider.value);
       //var token = editor.getTokenAt(cursor);
+      var cursor = slideCursor;
       var number = getNumber(cursor);
       //console.log("SLIDING", ui.value+"", token.start, token.end)
       var start = {"line":cursor.line, "ch":number.start};
       var end = {"line":cursor.line, "ch":number.end};
       editor.replaceRange(value, start, end);
     }
-    //TODO: handle key events
-    function onKeyDown(event) {
+    
+    function onKeyDown() {
+      if(arguments.length == 1) { 
+        event = arguments[0]
+      } else {
+        event = arguments[1];
+      }
       //if left or right arrows, we can step through the slider
       //disable the slider + picker on key event
+      if(event.keyCode == 37) {
+        //LEFT
+        if(sliderDiv.style.visibility === "visible") {
+          slider.stepDown(1);
+          onSlide();
+          return true;
+        } else {
+          picker.element.style.display = "none";
+        }
+      } else if(event.keyCode == 39) {
+        //RIGHT
+        if(sliderDiv.style.visibility === "visible") {
+          slider.stepUp(1);
+          onSlide();
+          return true;
+        } else {
+          picker.element.style.display = "none";
+        }
+      } else {
+        sliderDiv.style.visibility = "hidden";
+        picker.element.style.display = "none";
+      }
     }
 
     //make the colorpicker
@@ -66,11 +100,29 @@ var Inlet = (function() {
     //Handle clicks
     function onClick(ev) {
       var cursor = editor.getCursor(true);
+      slideCursor = cursor;
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
       //if(token.className === "number") {
-      if(number) {
+      var hexMatch = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/);
+      if(hexMatch) {
+        //turn on color picker
+        var color = hexMatch[0];
+        color = color.slice(1, color.length);
+        picker.update(color);
+
+        //TODO: make positioning of color picker configurable
+        var top = cursorOffset.top - 210 + "px";
+        var left = cursorOffset.left - 75 + "px";
+        var ColorPicker = document.getElementById("ColorPicker");
+        ColorPicker.style.position = "absolute";
+        ColorPicker.style.top = top;
+        ColorPicker.style.left = left;
+        picker.toggle(true);
+        sliderDiv.style.visibility = "hidden";
+      } else if(number) {
+        picker.toggle(false);
         slider.value = 0;
         //parse the number out
         var value = parseFloat(number.string);
@@ -121,45 +173,22 @@ var Inlet = (function() {
         sliderDiv.style.left = sliderLeft + "px";
 
         sliderDiv.style.visibility = "visible";
-        //slider.css('visibility', 'visible');
         picker.element.style.display = "none";
-
-      //else if #use regex to check for color
       } else {
-        var match = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/);
-        if(match) {
-            //turn on color picker
-            var color = match[0];
-            color = color.slice(1, color.length);
-            picker.update(color);
-
-            //TODO: make positioning of color picker configurable
-            var top = cursorOffset.top - 210 + "px";
-            var left = cursorOffset.left - 75 + "px";
-            var ColorPicker = document.getElementById("ColorPicker");
-            ColorPicker.style.position = "absolute";
-            ColorPicker.style.top = top;
-            ColorPicker.style.left = left;
-            picker.toggle(true);
-        } else {
-            picker.toggle(false);
-        }
-        
+        slideCursor = null;
         sliderDiv.style.visibility = "hidden";
+        picker.element.style.display = "none";
       }
     }
   }
   
   function getNumber(cursor) {
     //we do a regex over a whole line, and return the number which the cursor touches
-    
     var line = editor.getLine(cursor.line);
-    console.log("line!", line)
     //matches any number, even scientific notation.
     var re = /[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
     var match = re.exec(line);
     //console.log("match!", match, match.index);
-    
     while(match) {
       var val = match[0];
       var len = val.length;
