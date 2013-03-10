@@ -32,7 +32,7 @@
 }
 .inlet_slider .range {
   width: 90%;
-  margin-left: 5px;
+  margin-left: 5%;
   margin-top: 0px;
 }
 input[type="range"] {
