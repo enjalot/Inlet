@@ -1,13 +1,67 @@
 #editor {
-  margin-top: 250px;
-  margin-left: 50px;
+  width: 100%;
 }
 #example {
+  margin-top: 20px;
   display: block;
-  position: absolute;
-  top: 100px;
-  left: 100px;
-  width: 300px;
 }
 
+#description {
+  width: 50%;
+  height: 100%;
+  text-align: center;
+  padding-bottom: 30px;
+  line-height: 1.32em;
+  font-size: 1.45em;
+  margin:0 auto;
+}
 
+h1 {
+  font-family: 'Alegreya';
+  font-style: italic;
+  display: block;
+  width: 100%;
+  text-align: center;
+  cursor: default;
+  color: #000000;
+  font-size: 5.75em;
+  line-height: 1.1em;
+  letter-spacing: -1px;
+  font-weight: 800;
+  margin-top: -25px;
+  margin-bottom: 18px;
+  -webkit-transition: color 0.24s ease-in;
+  -moz-transition: color 0.24s ease-in;
+  -o-transition: color 0.24s ease-in;
+  transition: color 0.24s ease-in;
+  text-shadow: rgba(233, 233, 233, 0.9) 0 2px 3px;
+}
+h1 {
+  }
+h1:hover {
+  color: #191919;
+}
+
+body {
+  font: normal 100% 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  max-width: 896px;
+  padding: 32px 48px 84px;
+  color: #333333;
+  -webkit-text-size-adjust: 100%;
+  /* Stops Mobile Safari from auto-adjusting font-sizes */
+
+  margin-left: auto;
+  margin-right: auto;
+}
+a:link {
+  color: #364b11;
+  -webkit-transition: all 0.24s ease-in-out;
+  -moz-transition: all 0.24s ease-in-out;
+  transition: all 0.24s ease-in-out;
+}
+a:hover {
+  color: #182108;
+}
+a:visited {
+  color: #090d03;
+}
