@@ -1,0 +1,13 @@
+#editor {
+  margin-top: 250px;
+  margin-left: 50px;
+}
+#example {
+  display: block;
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 300px;
+}
+
+

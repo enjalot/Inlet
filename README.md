@@ -28,6 +28,11 @@ var editor = CodeMirror('#editor', ...)
 Inlet(editor)
 ```
 
+Unfortunately input type=range is not currently supported in FireFox
+http://html5test.com/compare/feature/form-range-element.html  
+you may want to try:
+http://frankyan.com/labs/html5slider/
+
 # Development
 
 Install
