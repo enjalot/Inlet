@@ -6,9 +6,9 @@ See an example at http://enjalot.github.com/Inlet
 
 This project is inspired by Bret Victor's talk ["Inventing on Principle"](https://vimeo.com/36579366)  
 
-The the slider code is adapted from Gabriel Florit's [Water project](http://gabrielflor.it/water)  
+The the slider code is originally adapted from Gabriel Florit's [Water project](http://gabrielflor.it/water) the predecesor for [Livecoding.io](http://livecoding.io)
 
-The [Color Picker library](https://github.com/mudcube/Color-Picker)  
+The [Color Picker library](https://github.com/mudcube/Color-Picker) is used to provide the color picker.
 
 This project is used in enjalot's [Tributary](http://tributary.io)  
 
@@ -26,6 +26,14 @@ The key bit of javascript code to kick things off is:
 ```javascript
 var editor = CodeMirror('#editor', ...)
 Inlet(editor)
+```
+
+# Development
+
+Install
+```
+npm Install
+make
 ```
 
 Enjoy!
