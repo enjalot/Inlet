@@ -693,7 +693,7 @@ if (typeof Color.Space === "undefined") Color.Space = {};
   };
 })();
 
-var Inlet = function() {
+Inlet = function() {
   function inlet(ed, options) {
     var editor = ed;
     var slider;
