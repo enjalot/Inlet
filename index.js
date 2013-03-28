@@ -1,3 +1,3 @@
-require("./inlet.min.js");
+require("./inlet.js");
 module.exports = Inlet;
 
