@@ -18,6 +18,7 @@
     "url": "http://github.com/enjalot/Inlet.git"
   },
   "dependencies": {
+    "jsdom": "0.3.4"
   },
   "devDependencies": {
     "uglify-js": "1.2.3",
