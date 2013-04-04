@@ -714,11 +714,11 @@ Inlet = function() {
     slider.setAttribute("type", "range");
     slider.addEventListener("change", onSlide);
     sliderDiv.appendChild(slider);
-    var slideCursor;
     function onSlide(event) {
       var value = String(slider.value);
-      var cursor = slideCursor;
+      var cursor = editor.getCursor(true);
       var number = getNumber(cursor);
+      if (!number) return;
       var start = {
         line: cursor.line,
         ch: number.start
@@ -764,36 +764,32 @@ Inlet = function() {
       callback: function(rgba, state, type) {
         var newcolor = Color.Space(rgba, "RGB>STRING");
         var cursor = editor.getCursor();
-        var token = editor.getTokenAt(cursor);
+        var hex = getHex(cursor);
+        if (!hex) return;
         var start = {
           line: cursor.line,
-          ch: token.start
+          ch: hex.start
         };
         var end = {
           line: cursor.line,
-          ch: token.end
+          ch: hex.end
         };
-        start.ch = start.ch + token.string.indexOf("#");
-        var match = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/)[0];
-        end.ch = start.ch + match.length;
         editor.replaceRange("#" + newcolor.toUpperCase(), start, end);
       }
     });
     function onClick(ev) {
       var cursor = editor.getCursor(true);
-      slideCursor = cursor;
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
-      var hexMatch = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/);
+      var hexMatch = getHex(cursor);
       if (hexMatch) {
-        var color = hexMatch[0];
+        var color = hexMatch.string;
         color = color.slice(1, color.length);
         picker.update(color);
         var top = cursorOffset.top - 210 + "px";
         var left = cursorOffset.left - 75 + "px";
         var ColorPicker = picker.element;
-        console.log("PICKER", picker);
         ColorPicker.style.position = "absolute";
         ColorPicker.style.top = top;
         ColorPicker.style.left = left;
@@ -835,14 +831,35 @@ Inlet = function() {
         sliderDiv.style.visibility = "visible";
         picker.element.style.display = "none";
       } else {
-        slideCursor = null;
         sliderDiv.style.visibility = "hidden";
         picker.element.style.display = "none";
       }
     }
+    function getHex(cursor) {
+      var line = editor.getLine(cursor.line);
+      var re = /#[a-fA-F0-9]{3,6}/g;
+      var match = re.exec(line);
+      while (match) {
+        var val = match[0];
+        var len = val.length;
+        var start = match.index;
+        var end = match.index + len;
+        console.log("match", start, cursor.ch, end, match);
+        if (cursor.ch >= start && cursor.ch <= end) {
+          match = null;
+          return {
+            start: start,
+            end: end,
+            string: val
+          };
+        }
+        match = re.exec(line);
+      }
+      return;
+    }
     function getNumber(cursor) {
       var line = editor.getLine(cursor.line);
-      var re = /[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+      var re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
       var match = re.exec(line);
       while (match) {
         var val = match[0];
