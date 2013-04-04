@@ -31,11 +31,8 @@
     <h1 id="title">Inlet</h1>
   </div>
   <div id="description">
-    Play with the code in CodeMirror just by clicking on numbers and colors!<br>
+    Manual Testing Page.
 
-    <strong><a href="https://github.com/enjalot/Inlet">check out the code</a></strong><br><br>
-    by <strong><a href="http://twitter.com/enjalot">@enjalot</a></strong> and <strong><a href="http://twitter.com/mrejfox">@mrejfox</a></strong>
-    
     <span id="example">42 === The answer to life, the universe and everything.</div>
   </div>
   
@@ -49,18 +46,15 @@
 
   <textarea id="test-code" style="display:none;">
 //Test cases;
-var theAnswer = 100;
-var x = {a:0,b:0};
+var theAnswer = 42;
+var x = {a:100,b:100};
 var color = "#fff";
 var color1 = "#ffffff", color2 = "#000000";
 var string = "a color #fff and another #000";
   </textarea>
 
   <script>
-    console.log("sup", document.getElementById("test-code").value)
     var editor = CodeMirror(document.getElementById("editor"),{
-      //default code for example:
-      //value: '//Click on the hex value or number below:\n\nvar color = "#D1FFDB"\n\nvar theAnswer = 42;\n\n//Usage looks like:\n//var editor = CodeMirror(...);\n//Inlet(editor);',
       value: document.getElementById("test-code").value,
       mode:  "javascript",
       theme: "monokai",

@@ -27,21 +27,33 @@ Inlet = (function() {
     slider.className = "range";
     slider.setAttribute("type", "range");
     slider.addEventListener("change", onSlide);
+    slider.addEventListener("mouseup", onSlideMouseUp);
     //slider.style.width = "inherit";
     sliderDiv.appendChild(slider);
     
-    //we keep track where the last slide cursor was set;
-    //var slideCursor;
     
     function onSlide(event) {
       var value = String(slider.value);
-      //var cursor = slideCursor;
       var cursor = editor.getCursor(true);
       var number = getNumber(cursor);
       if(!number) return;
       var start = {"line":cursor.line, "ch":number.start};
       var end = {"line":cursor.line, "ch":number.end};
       editor.replaceRange(value, start, end);
+    }
+    
+    function onSlideMouseUp(event) {
+      slider.value = 0;
+      var cursor = editor.getCursor(true);
+      var number = getNumber(cursor);
+      if(!number) return;
+      var value = parseFloat(number.string);
+      var sliderRange = getSliderRange(value);
+      slider.setAttribute("value", value);
+      slider.setAttribute("step", sliderRange.step);
+      slider.setAttribute("min", sliderRange.min);
+      slider.setAttribute("max", sliderRange.max);
+      slider.value = value;
     }
     
     function onKeyDown() {
@@ -99,7 +111,6 @@ Inlet = (function() {
     //Handle clicks
     function onClick(ev) {
       var cursor = editor.getCursor(true);
-      //slideCursor = cursor;
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
@@ -125,34 +136,12 @@ Inlet = (function() {
       } else if(number) {
         picker.toggle(false);
         slider.value = 0;
-        //parse the number out
         var value = parseFloat(number.string);
-        var sliderRange;
-        // this comes from water project:
-        // set the slider params based on the token's numeric value
-        if (value === 0) { 
-            sliderRange = [-100, 100];
-        } else {
-            sliderRange = [-value * 3, value * 5];
-        }
-
-        if(sliderRange[0] < sliderRange[1]) {
-          sliderMin = sliderRange[0];
-          sliderMax = sliderRange[1];
-        } else {
-          sliderMin = sliderRange[1];
-          sliderMax = sliderRange[0];
-        }
-        slider.setAttribute("min", sliderMin);
-        slider.setAttribute("max", sliderMax);
-
-        // slider range needs to be evenly divisible by the step
-        if ((sliderMax - sliderMin) > 20) {
-          slider.setAttribute("step", 1);
-        } else {
-          slider.setAttribute("step", (sliderMax - sliderMin) / 200);
-        }
+        var sliderRange = getSliderRange(value);
         slider.setAttribute("value", value);
+        slider.setAttribute("step", sliderRange.step);
+        slider.setAttribute("min", sliderRange.min);
+        slider.setAttribute("max", sliderRange.max);
         slider.value = value;
 
         //setup slider position
@@ -173,9 +162,37 @@ Inlet = (function() {
         sliderDiv.style.visibility = "visible";
         picker.element.style.display = "none";
       } else {
-        //slideCursor = null;
         sliderDiv.style.visibility = "hidden";
         picker.element.style.display = "none";
+      }
+    }
+    
+    function getSliderRange(value) {
+      //this could be substituted out for other heuristics
+      var range, step, sliderMin, sliderMax;
+      //these values were chosen by Gabriel Florit for his livecoding project, they work really well!
+      if (value === 0) { 
+        range = [-100, 100];
+      } else {
+        range = [-value * 3, value * 5];
+      }
+      if(range[0] < range[1]) {
+        min = range[0];
+        max = range[1];
+      } else {
+        min = range[1];
+        max = range[0];
+      }
+      // slider range needs to be evenly divisible by the step
+      if ((max - min) > 20) {
+        step = 1;
+      } else {
+        step = (max - min) / 200;
+      }
+      return {
+        min: min,
+        max: max,
+        step: step
       }
     }
     

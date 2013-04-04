@@ -713,6 +713,7 @@ Inlet = function() {
     slider.className = "range";
     slider.setAttribute("type", "range");
     slider.addEventListener("change", onSlide);
+    slider.addEventListener("mouseup", onSlideMouseUp);
     sliderDiv.appendChild(slider);
     function onSlide(event) {
       var value = String(slider.value);
@@ -728,6 +729,19 @@ Inlet = function() {
         ch: number.end
       };
       editor.replaceRange(value, start, end);
+    }
+    function onSlideMouseUp(event) {
+      slider.value = 0;
+      var cursor = editor.getCursor(true);
+      var number = getNumber(cursor);
+      if (!number) return;
+      var value = parseFloat(number.string);
+      var sliderRange = getSliderRange(value);
+      slider.setAttribute("value", value);
+      slider.setAttribute("step", sliderRange.step);
+      slider.setAttribute("min", sliderRange.min);
+      slider.setAttribute("max", sliderRange.max);
+      slider.value = value;
     }
     function onKeyDown() {
       if (arguments.length == 1) {
@@ -799,27 +813,11 @@ Inlet = function() {
         picker.toggle(false);
         slider.value = 0;
         var value = parseFloat(number.string);
-        var sliderRange;
-        if (value === 0) {
-          sliderRange = [ -100, 100 ];
-        } else {
-          sliderRange = [ -value * 3, value * 5 ];
-        }
-        if (sliderRange[0] < sliderRange[1]) {
-          sliderMin = sliderRange[0];
-          sliderMax = sliderRange[1];
-        } else {
-          sliderMin = sliderRange[1];
-          sliderMax = sliderRange[0];
-        }
-        slider.setAttribute("min", sliderMin);
-        slider.setAttribute("max", sliderMax);
-        if (sliderMax - sliderMin > 20) {
-          slider.setAttribute("step", 1);
-        } else {
-          slider.setAttribute("step", (sliderMax - sliderMin) / 200);
-        }
+        var sliderRange = getSliderRange(value);
         slider.setAttribute("value", value);
+        slider.setAttribute("step", sliderRange.step);
+        slider.setAttribute("min", sliderRange.min);
+        slider.setAttribute("max", sliderRange.max);
         slider.value = value;
         var y_offset = 15;
         var sliderTop = cursorOffset.top - y_offset;
@@ -835,6 +833,31 @@ Inlet = function() {
         picker.element.style.display = "none";
       }
     }
+    function getSliderRange(value) {
+      var range, step, sliderMin, sliderMax;
+      if (value === 0) {
+        range = [ -100, 100 ];
+      } else {
+        range = [ -value * 3, value * 5 ];
+      }
+      if (range[0] < range[1]) {
+        min = range[0];
+        max = range[1];
+      } else {
+        min = range[1];
+        max = range[0];
+      }
+      if (max - min > 20) {
+        step = 1;
+      } else {
+        step = (max - min) / 200;
+      }
+      return {
+        min: min,
+        max: max,
+        step: step
+      };
+    }
     function getHex(cursor) {
       var line = editor.getLine(cursor.line);
       var re = /#[a-fA-F0-9]{3,6}/g;
@@ -844,7 +867,6 @@ Inlet = function() {
         var len = val.length;
         var start = match.index;
         var end = match.index + len;
-        console.log("match", start, cursor.ch, end, match);
         if (cursor.ch >= start && cursor.ch <= end) {
           match = null;
           return {
