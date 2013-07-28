@@ -3,10 +3,10 @@ Inlet = (function() {
     var editor = ed;
     var slider;
     var picker;
-    
+
     if(!options) options = {};
     var container = options.container || document.body;
-    
+
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
     //wrapper.addEventListener("keydown", onKeyDown);
@@ -22,7 +22,7 @@ Inlet = (function() {
     container.appendChild(sliderDiv);
     //TODO: figure out how to capture key events when slider has focus
     //sliderDiv.addEventListener("keydown", onKeyDown);
-    
+
     var slider = document.createElement("input");
     slider.className = "range";
     slider.setAttribute("type", "range");
@@ -30,8 +30,8 @@ Inlet = (function() {
     slider.addEventListener("mouseup", onSlideMouseUp);
     //slider.style.width = "inherit";
     sliderDiv.appendChild(slider);
-    
-    
+
+
     function onSlide(event) {
       var value = String(slider.value);
       var cursor = editor.getCursor(true);
@@ -41,7 +41,7 @@ Inlet = (function() {
       var end = {"line":cursor.line, "ch":number.end};
       editor.replaceRange(value, start, end);
     }
-    
+
     function onSlideMouseUp(event) {
       slider.value = 0;
       var cursor = editor.getCursor(true);
@@ -55,7 +55,11 @@ Inlet = (function() {
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
     }
-    
+
+    var LEFT = 37;
+    var UP = 38;
+    var RIGHT = 39;
+    var DOWN = 40;
     function onKeyDown() {
       if(arguments.length == 1) { 
         event = arguments[0]
@@ -64,21 +68,25 @@ Inlet = (function() {
       }
       //if left or right arrows, we can step through the slider
       //disable the slider + picker on key event
-      if(event.keyCode == 37) {
+      if(event.keyCode == LEFT || event.keyCode == DOWN) {
         //LEFT
         if(sliderDiv.style.visibility === "visible") {
           slider.stepDown(1);
           onSlide();
           return true;
+        } else if(event.altKey) {
+          onClick();
         } else {
           picker.element.style.display = "none";
         }
-      } else if(event.keyCode == 39) {
+      } else if(event.keyCode == RIGHT || event.keyCode == UP) {
         //RIGHT
         if(sliderDiv.style.visibility === "visible") {
           slider.stepUp(1);
           onSlide();
           return true;
+        } else if(event.altKey) {
+          onClick();
         } else {
           picker.element.style.display = "none";
         }
@@ -98,7 +106,7 @@ Inlet = (function() {
         var newcolor = Color.Space(rgba, "RGB>STRING");
         //set the cursor to desired location
         var cursor = editor.getCursor();
-       
+
         var hex = getHex(cursor);
         if(!hex) return;
         var start = {"line":cursor.line, "ch":hex.start};

@@ -743,25 +743,33 @@ Inlet = function() {
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
     }
+    var LEFT = 37;
+    var UP = 38;
+    var RIGHT = 39;
+    var DOWN = 40;
     function onKeyDown() {
       if (arguments.length == 1) {
         event = arguments[0];
       } else {
         event = arguments[1];
       }
-      if (event.keyCode == 37) {
+      if (event.keyCode == LEFT || event.keyCode == DOWN) {
         if (sliderDiv.style.visibility === "visible") {
           slider.stepDown(1);
           onSlide();
           return true;
+        } else if (event.altKey) {
+          onClick();
         } else {
           picker.element.style.display = "none";
         }
-      } else if (event.keyCode == 39) {
+      } else if (event.keyCode == RIGHT || event.keyCode == UP) {
         if (sliderDiv.style.visibility === "visible") {
           slider.stepUp(1);
           onSlide();
           return true;
+        } else if (event.altKey) {
+          onClick();
         } else {
           picker.element.style.display = "none";
         }
