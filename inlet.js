@@ -813,7 +813,6 @@ Inlet = function() {
         if (cursorOffset.top < 250) {
           top = cursorOffset.top + 15 + "px";
         }
-        console.log(cursorOffset.top, top);
         var left = cursorOffset.left - 75 + "px";
         var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";

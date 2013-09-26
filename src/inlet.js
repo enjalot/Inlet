@@ -61,7 +61,7 @@ Inlet = (function() {
     var RIGHT = 39;
     var DOWN = 40;
     function onKeyDown() {
-      if(arguments.length == 1) { 
+      if(arguments.length == 1) {
         event = arguments[0]
       } else {
         event = arguments[1];
