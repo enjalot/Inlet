@@ -131,9 +131,11 @@ Inlet = (function() {
         var color = hexMatch.string;
         color = color.slice(1, color.length);
         picker.update(color);
-
         //TODO: make positioning of color picker configurable
         var top = cursorOffset.top - 210 + "px";
+        // TODO: change extra offset to vary on font size
+        // TODO: make top offset boundary parameterized
+        if (cursorOffset.top < 250) {top = cursorOffset.top + 15 + "px";}
         var left = cursorOffset.left - 75 + "px";
         var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";

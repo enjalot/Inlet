@@ -810,9 +810,10 @@ Inlet = function() {
         color = color.slice(1, color.length);
         picker.update(color);
         var top = cursorOffset.top - 210 + "px";
-        // todo: change extra offset to vary on font size
-        // todo: make top offset boundary parameterized
-        if (cursorOffset.top < 250) {top = cursorOffset.top + 15 + "px";}
+        if (cursorOffset.top < 250) {
+          top = cursorOffset.top + 15 + "px";
+        }
+        console.log(cursorOffset.top, top);
         var left = cursorOffset.left - 75 + "px";
         var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";
