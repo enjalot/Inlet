@@ -5,7 +5,16 @@ Inlet = (function() {
     var picker;
 
     if(!options) options = {};
+    if(!options.picker) options.picker = {};
+    if(!options.slider) options.slider = {};
     var container = options.container || document.body;
+
+    // TODO: document/consider renaming
+    var topOffset = options.picker.topOffset || 210;
+    var bottomOffset = options.picker.bottomOffset || 16;
+    var topBoundary = options.picker.topBoundary || 250;
+    var leftOffset = options.picker.leftOffset || 75;
+    var y_offset = options.slider.yOffset || 15;
 
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
@@ -123,24 +132,22 @@ Inlet = (function() {
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
 
-      //if(token.className === "number") {
-      //var hexMatch = token.string.match(/#+(([a-fA-F0-9]){3}){1,2}/);
       var hexMatch = getHex(cursor);
       if(hexMatch) {
         //turn on color picker
         var color = hexMatch.string;
         color = color.slice(1, color.length);
         picker.update(color);
-        //TODO: make positioning of color picker configurable
-        var top = cursorOffset.top - 210 + "px";
-        // TODO: change extra offset to vary on font size
-        // TODO: make top offset boundary parameterized
-        if (cursorOffset.top < 250) {top = cursorOffset.top + 15 + "px";}
-        var left = cursorOffset.left - 75 + "px";
+
+        // setup colorpicker position
+        var top = (cursorOffset.top - topOffset) + "px";
+        if (cursorOffset.top < topBoundary) {top = (cursorOffset.top + bottomOffset) + "px";}
+        var left = cursorOffset.left - leftOffset + "px";
         var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";
         ColorPicker.style.top = top;
         ColorPicker.style.left = left;
+
         picker.toggle(true);
         sliderDiv.style.visibility = "hidden";
       } else if(number) {
@@ -156,8 +163,6 @@ Inlet = (function() {
 
         //setup slider position
         // position slider centered above the cursor
-        //TODO: take in y_offset as a parameter
-        var y_offset = 15;
                 
         var sliderTop = cursorOffset.top - y_offset;
         var sliderStyle = window.getComputedStyle(sliderDiv);

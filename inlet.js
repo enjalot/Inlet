@@ -699,7 +699,14 @@ Inlet = function() {
     var slider;
     var picker;
     if (!options) options = {};
+    if (!options.picker) options.picker = {};
+    if (!options.slider) options.slider = {};
     var container = options.container || document.body;
+    var topOffset = options.picker.topOffset || 210;
+    var bottomOffset = options.picker.bottomOffset || 16;
+    var topBoundary = options.picker.topBoundary || 250;
+    var leftOffset = options.picker.leftOffset || 75;
+    var y_offset = options.slider.yOffset || 15;
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
     editor.setOption("onKeyEvent", onKeyDown);
@@ -809,11 +816,11 @@ Inlet = function() {
         var color = hexMatch.string;
         color = color.slice(1, color.length);
         picker.update(color);
-        var top = cursorOffset.top - 210 + "px";
-        if (cursorOffset.top < 250) {
-          top = cursorOffset.top + 15 + "px";
+        var top = cursorOffset.top - topOffset + "px";
+        if (cursorOffset.top < topBoundary) {
+          top = cursorOffset.top + bottomOffset + "px";
         }
-        var left = cursorOffset.left - 75 + "px";
+        var left = cursorOffset.left - leftOffset + "px";
         var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";
         ColorPicker.style.top = top;
@@ -830,7 +837,6 @@ Inlet = function() {
         slider.setAttribute("min", sliderRange.min);
         slider.setAttribute("max", sliderRange.max);
         slider.value = value;
-        var y_offset = 15;
         var sliderTop = cursorOffset.top - y_offset;
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
