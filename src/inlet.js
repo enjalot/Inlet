@@ -86,7 +86,7 @@ Inlet = (function() {
         } else if(event.altKey) {
           onClick();
         } else {
-          picker.element.style.display = "none";
+          //picker.element.style.display = "none";
         }
       } else if(event.keyCode == RIGHT || event.keyCode == UP) {
         //RIGHT
@@ -97,16 +97,16 @@ Inlet = (function() {
         } else if(event.altKey) {
           onClick();
         } else {
-          picker.element.style.display = "none";
+          //picker.element.style.display = "none";
         }
       } else {
         sliderDiv.style.visibility = "hidden";
-        picker.element.style.display = "none";
+        //picker.element.style.display = "none";
       }
     }
 
     //make the colorpicker
-    picker = new Color.Picker({
+    /*picker = new Color.Picker({
       container: container,
       color: "#643263",// accepts rgba(), or #hex
       display: false,
@@ -123,7 +123,7 @@ Inlet = (function() {
         editor.replaceRange("#" + newcolor.toUpperCase(), start, end);
 
       }
-    });
+    });*/
 
     //Handle clicks
     function onClick(ev) {
@@ -136,22 +136,26 @@ Inlet = (function() {
       if(hexMatch) {
         //turn on color picker
         var color = hexMatch.string;
-        color = color.slice(1, color.length);
-        picker.update(color);
+        //color = color.slice(1, color.length);
+        //picker.update(color);
 
         // setup colorpicker position
-        var top = (cursorOffset.top - topOffset) + "px";
-        if (cursorOffset.top < topBoundary) {top = (cursorOffset.top + bottomOffset) + "px";}
-        var left = cursorOffset.left - leftOffset + "px";
-        var ColorPicker = picker.element;
+        var top = (cursorOffset.top - topOffset) //+ "px";
+        if (cursorOffset.top < topBoundary) {top = (cursorOffset.top + bottomOffset)} //+ "px";}
+        var left = cursorOffset.left - leftOffset //+ "px";
+        /*var ColorPicker = picker.element;
         ColorPicker.style.position = "absolute";
         ColorPicker.style.top = top;
         ColorPicker.style.left = left;
-
-        picker.toggle(true);
+        */
+        
+        //picker.toggle(true);
+        console.log(color)
+        picker = new thistle.Picker(color)
+        picker.presentModal(left,top,color)
         sliderDiv.style.visibility = "hidden";
       } else if(number) {
-        picker.toggle(false);
+        //picker.toggle(false);
         slider.value = 0;
         var value = parseFloat(number.string);
         var sliderRange = getSliderRange(value);
@@ -175,10 +179,10 @@ Inlet = (function() {
         sliderDiv.style.left = sliderLeft + "px";
 
         sliderDiv.style.visibility = "visible";
-        picker.element.style.display = "none";
+        //picker.element.style.display = "none";
       } else {
         sliderDiv.style.visibility = "hidden";
-        picker.element.style.display = "none";
+        //picker.element.style.display = "none";
       }
     }
     
