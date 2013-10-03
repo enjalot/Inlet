@@ -20,7 +20,6 @@ thistle.js:
 
 .INTERMEDIATE inlet.js: \
 	src/thistle/thistle.js \
-	src/Color.Picker.Classic.js \
 	src/Color.Space.js \
 	src/inlet.js 
 	
