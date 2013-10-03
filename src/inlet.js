@@ -44,7 +44,7 @@ Inlet = (function() {
     function onSlide(event) {
       var value = String(slider.value);
       var cursor = editor.getCursor(true);
-      var number = getNumber(cursor);
+      var number = getMatch(cursor,'number');
       if(!number) return;
       var start = {"line":cursor.line, "ch":number.start};
       var end = {"line":cursor.line, "ch":number.end};
@@ -54,7 +54,7 @@ Inlet = (function() {
     function onSlideMouseUp(event) {
       slider.value = 0;
       var cursor = editor.getCursor(true);
-      var number = getNumber(cursor);
+      var number = getMatch(cursor,'number');
       if(!number) return;
       var value = parseFloat(number.string);
       var sliderRange = getSliderRange(value);
@@ -86,7 +86,6 @@ Inlet = (function() {
         } else if(event.altKey) {
           onClick();
         } else {
-          //picker.element.style.display = "none";
         }
       } else if(event.keyCode == RIGHT || event.keyCode == UP) {
         //RIGHT
@@ -97,76 +96,69 @@ Inlet = (function() {
         } else if(event.altKey) {
           onClick();
         } else {
-          //picker.element.style.display = "none";
         }
       } else {
         sliderDiv.style.visibility = "hidden";
-        //picker.element.style.display = "none";
       }
     }
 
-    //make the colorpicker
-    /*picker = new Color.Picker({
-      container: container,
-      color: "#643263",// accepts rgba(), or #hex
-      display: false,
-      size: 150,*/
-    var pickerCallback = function(color, state, type) {
-        //var newcolor = Color.Space(rgba, "RGB>STRING");
+    var pickerCallback = function(color, type) {
         //set the cursor to desired location
         var cursor = editor.getCursor();
-
-        var hex = getHsl(cursor);
-        if(!hex) return;
-        var start = {"line":cursor.line, "ch":hex.start};
-        var end = {"line":cursor.line, "ch":hex.end};
+        // we need to re-match in case the size of the string changes
+        if (!type) return;
+        var match = getMatch(cursor, type);
+        var start = {"line":cursor.line, "ch":match.start};
+        var end = {"line":cursor.line, "ch":match.end};
         editor.replaceRange(color, start, end);
-
     }
     // this will be overwritten if hslMatch hits
     // so that the "old color view" will initilize correctly
     picker = new thistle.Picker("#ffffff")
+    // setup colorpicker position
 
     //Handle clicks
     function onClick(ev) {
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
-      var number = getNumber(cursor);
 
-      var hexMatch = getHsl(cursor);
+      // see if there is a match on the cursor click
+      var numberMatch = getMatch(cursor, 'number');
+      var hslMatch = getMatch(cursor, 'hsl');
+      var hexMatch = getMatch(cursor, 'hex');
+
+      var pickerTop = (cursorOffset.top - topOffset);
+      if (cursorOffset.top < topBoundary) {pickerTop = (cursorOffset.top + bottomOffset)}
+      var pickerLeft = cursorOffset.left - leftOffset;
+
+
       if(hexMatch) {
-        //turn on color picker
         var color = hexMatch.string;
-        //color = color.slice(1, color.length);
-        //picker.update(color);
-
-        // setup colorpicker position
-        var top = (cursorOffset.top - topOffset) //+ "px";
-        if (cursorOffset.top < topBoundary) {top = (cursorOffset.top + bottomOffset)} //+ "px";}
-        var left = cursorOffset.left - leftOffset //+ "px";
-        /*var ColorPicker = picker.element;
-        ColorPicker.style.position = "absolute";
-        ColorPicker.style.top = top;
-        ColorPicker.style.left = left;
-        */
-        
-        //picker.toggle(true);
-        //console.log(color)
-        picker = new thistle.Picker(color) // moved to here so that old color shows
-        picker.setCSS(color)
-        picker.presentModal(left,top)
+        // reconstructing the picker so that the previous color 
+        // element shows the color clicked
+        picker = new thistle.Picker(color)
+        picker.setCSS(color) // current color selection
+        picker.presentModal(pickerLeft,pickerTop)
         picker.on('changed',function() {
           picked = picker.getCSS()
-          //console.log(picked)
-          pickerCallback(picked)
+          //translate hsl return to hex
+          picked = Color.Space(picked, "W3>HSL>RGB>HEX24>W3");
+          pickerCallback(picked,'hex')
         })
-
         sliderDiv.style.visibility = "hidden";
-      } else if(number) {
-        //picker.toggle(false);
+      } else if (hslMatch) {
+        var color = hslMatch.string;
+        picker = new thistle.Picker(color)
+        picker.setCSS(color)
+        picker.presentModal(pickerLeft,pickerTop)
+        picker.on('changed',function() {
+          picked = picker.getCSS()
+          pickerCallback(picked,'hsl')
+        })
+      } else if(numberMatch) {
         slider.value = 0;
-        var value = parseFloat(number.string);
+        var value = parseFloat(numberMatch.string);
         var sliderRange = getSliderRange(value);
         slider.setAttribute("value", value);
         slider.setAttribute("step", sliderRange.step);
@@ -180,18 +172,14 @@ Inlet = (function() {
         var sliderTop = cursorOffset.top - y_offset;
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
-        
         var sliderLeft = cursorOffset.left - sliderWidth/2;
 
-        //slider.offset({top: sliderTop - 10, left: sliderLeft});
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
 
         sliderDiv.style.visibility = "visible";
-        //picker.element.style.display = "none";
       } else {
         sliderDiv.style.visibility = "hidden";
-        //picker.element.style.display = "none";
       }
     }
     
@@ -224,58 +212,27 @@ Inlet = (function() {
       }
     }
     
-    function getHsl(cursor) {
-      var line = editor.getLine(cursor.line);
-      var re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
-      var match = re.exec(line);
-      while(match) {
-        var val = match[0];
-        var len = val.length;
-        var start = match.index;
-        var end = match.index + len;
-        if(cursor.ch >= start && cursor.ch <= end) {
-          match = null;
-          return {
-            start: start,
-            end: end,
-            string: val
-          };
-        }
-        match = re.exec(line);
-      }
-      return;
+    function getMatch(cursor, type) {
+      if (!type) return;
+      var re;
+      switch(type.toLowerCase()) {
+        case 'hsl':
+          re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
+          break;
+        case 'hex':
+          re = /#[a-fA-F0-9]{3,6}/g;
+          break;
 
-    }
+        case 'number':
+          re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+          break;
 
-    function getHex(cursor) {
-      //we do a regex over a whole line, and return the number which the cursor touches
-      var line = editor.getLine(cursor.line);
-      //var re = /#+(([a-fA-F0-9]){3}){1,2}/;
-      var re = /#[a-fA-F0-9]{3,6}/g;
-      var match = re.exec(line);
-      while(match) {
-        var val = match[0];
-        var len = val.length;
-        var start = match.index;
-        var end = match.index + len;
-        if(cursor.ch >= start && cursor.ch <= end) {
-          match = null;
-          return {
-            start: start,
-            end: end,
-            string: val
-          };
-        }
-        match = re.exec(line);
+        default:
+          throw new Error("invalid match selection");
+          return;
       }
-      return;
-    }
-    
-    function getNumber(cursor) {
-      //we do a regex over a whole line, and return the number which the cursor touches
+
       var line = editor.getLine(cursor.line);
-      //matches any number, even scientific notation.
-      var re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
       var match = re.exec(line);
       while(match) {
         var val = match[0];

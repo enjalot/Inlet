@@ -1008,17 +1008,19 @@ if (typeof Color === "undefined") var Color = {};
   };
 })();
 
-if (typeof Color === "undefined") Color = {};
+if (typeof Color === "undefined") var Color = {};
 
 if (typeof Color.Space === "undefined") Color.Space = {};
 
 (function() {
-  var DEG_RAD = Math.PI / 180;
-  var RAD_DEG = 1 / DEG_RAD;
+  "use strict";
+  var useEval = false;
   var functions = {};
   var shortcuts = {
-    "RGB>STRING": "RGB>HEX>STRING",
-    "STRING>RGB": "STRING>HEX>RGB"
+    "HEX24>HSL": "HEX24>RGB>HSL",
+    "HEX32>HSLA": "HEX32>RGBA>HSLA",
+    "HEX24>CMYK": "HEX24>RGB>CMY>CMYK",
+    "RGB>CMYK": "RGB>CMY>CMYK"
   };
   var root = Color.Space = function(color, route) {
     if (shortcuts[route]) {
@@ -1026,7 +1028,7 @@ if (typeof Color.Space === "undefined") Color.Space = {};
     }
     var r = route.split(">");
     if (typeof color === "object" && color[0] >= 0) {
-      var type = route.split(">")[0];
+      var type = r[0];
       var tmp = {};
       for (var i = 0; i < type.length; i++) {
         var str = type.substr(i, 1);
@@ -1044,9 +1046,13 @@ if (typeof Color.Space === "undefined") Color.Space = {};
       }
       key += (pos === 0 ? "" : "_") + r[pos];
       color = root[key](color);
-      f = "Color.Space." + key + "(" + f + ")";
+      if (useEval) {
+        f = "Color.Space." + key + "(" + f + ")";
+      }
     }
-    functions[route] = eval("(function(color) { return " + f + " })");
+    if (useEval) {
+      functions[route] = eval("(function(color) { return " + f + " })");
+    }
     return color;
   };
   root.RGB_W3 = function(o) {
@@ -1057,52 +1063,84 @@ if (typeof Color.Space === "undefined") Color.Space = {};
     return "rgba(" + (o.R >> 0) + "," + (o.G >> 0) + "," + (o.B >> 0) + "," + alpha + ")";
   };
   root.W3_RGB = function(o) {
-    var o = o.substr(4, o.length - 5).split(",");
+    o = o.substr(4, o.length - 5).split(",");
     return {
-      R: parseInt(o[0]),
-      G: parseInt(o[1]),
-      B: parseInt(o[2])
+      R: parseInt(o[0], 10),
+      G: parseInt(o[1], 10),
+      B: parseInt(o[2], 10)
     };
   };
   root.W3_RGBA = function(o) {
-    var o = o.substr(5, o.length - 6).split(",");
+    o = o.substr(5, o.length - 6).split(",");
     return {
-      R: parseInt(o[0]),
-      G: parseInt(o[1]),
-      B: parseInt(o[2]),
+      R: parseInt(o[0], 10),
+      G: parseInt(o[1], 10),
+      B: parseInt(o[2], 10),
       A: parseFloat(o[3]) * 255
     };
   };
-  root.STRING_HEX = function(o) {
-    return parseInt("0x" + o);
+  root.HSL_W3 = function(o) {
+    return "hsl(" + (o.H + .5 >> 0) + "," + (o.S + .5 >> 0) + "%," + (o.L + .5 >> 0) + "%)";
   };
-  root.STRING_HEX32 = function(o) {
+  root.HSLA_W3 = function(o) {
+    var alpha = typeof o.A === "number" ? o.A / 255 : 1;
+    return "hsla(" + (o.H + .5 >> 0) + "," + (o.S + .5 >> 0) + "%," + (o.L + .5 >> 0) + "%," + alpha + ")";
+  };
+  root.W3_HSL = function(o) {
+    var start = o.indexOf("(") + 1;
+    var end = o.indexOf(")");
+    o = o.substr(start, end - start).split(",");
+    return {
+      H: parseInt(o[0], 10),
+      S: parseInt(o[1], 10),
+      L: parseInt(o[2], 10)
+    };
+  };
+  root.W3_HSLA = function(o) {
+    var start = o.indexOf("(") + 1;
+    var end = o.indexOf(")");
+    o = o.substr(start, end - start).split(",");
+    return {
+      H: parseInt(o[0], 10),
+      S: parseInt(o[1], 10),
+      L: parseInt(o[2], 10),
+      A: parseFloat(o[3], 10) * 255
+    };
+  };
+  root.W3_HEX = root.W3_HEX24 = function(o) {
+    if (o.substr(0, 1) === "#") o = o.substr(1);
+    if (o.length === 3) o = o[0] + o[0] + o[1] + o[1] + o[2] + o[2];
+    return parseInt("0x" + o, 16);
+  };
+  root.W3_HEX32 = function(o) {
+    if (o.substr(0, 1) === "#") o = o.substr(1);
     if (o.length === 6) {
-      return parseInt("0xFF" + o);
+      return parseInt("0xFF" + o, 10);
     } else {
-      return parseInt("0x" + o);
+      return parseInt("0x" + o, 16);
     }
   };
-  root.HEX_STRING = function(o, maxLength) {
+  root.HEX_W3 = root.HEX24_W3 = function(o, maxLength) {
     if (!maxLength) maxLength = 6;
     if (!o) o = 0;
+    var n;
     var z = o.toString(16);
-    var n = z.length;
+    n = z.length;
     while (n < maxLength) {
       z = "0" + z;
       n++;
     }
-    var n = z.length;
+    n = z.length;
     while (n > maxLength) {
       z = z.substr(1);
       n--;
     }
-    return z;
+    return "#" + z;
   };
-  root.HEX32_STRING = function(o) {
-    return root.HEX_STRING(o, 8);
+  root.HEX32_W3 = function(o) {
+    return root.HEX_W3(o, 8);
   };
-  root.HEX_RGB = function(o) {
+  root.HEX_RGB = root.HEX24_RGB = function(o) {
     return {
       R: o >> 16,
       G: o >> 8 & 255,
@@ -1120,7 +1158,7 @@ if (typeof Color.Space === "undefined") Color.Space = {};
   root.RGBA_HEX32 = function(o) {
     return (o.A << 24 | o.R << 16 | o.G << 8 | o.B) >>> 0;
   };
-  root.RGB_HEX = function(o) {
+  root.RGB_HEX24 = root.RGB_HEX = function(o) {
     if (o.R < 0) o.R = 0;
     if (o.G < 0) o.G = 0;
     if (o.B < 0) o.B = 0;
@@ -1128,6 +1166,34 @@ if (typeof Color.Space === "undefined") Color.Space = {};
     if (o.G > 255) o.G = 255;
     if (o.B > 255) o.B = 255;
     return o.R << 16 | o.G << 8 | o.B;
+  };
+  root.RGB_CMY = function(o) {
+    return {
+      C: 1 - o.R / 255,
+      M: 1 - o.G / 255,
+      Y: 1 - o.B / 255
+    };
+  };
+  root.RGBA_HSLA = root.RGB_HSL = function(o) {
+    var _R = o.R / 255, _G = o.G / 255, _B = o.B / 255, min = Math.min(_R, _G, _B), max = Math.max(_R, _G, _B), D = max - min, H, S, L = (max + min) / 2;
+    if (D === 0) {
+      H = 0;
+      S = 0;
+    } else {
+      if (L < .5) S = D / (max + min); else S = D / (2 - max - min);
+      var DR = ((max - _R) / 6 + D / 2) / D;
+      var DG = ((max - _G) / 6 + D / 2) / D;
+      var DB = ((max - _B) / 6 + D / 2) / D;
+      if (_R === max) H = DB - DG; else if (_G === max) H = 1 / 3 + DR - DB; else if (_B === max) H = 2 / 3 + DG - DR;
+      if (H < 0) H += 1;
+      if (H > 1) H -= 1;
+    }
+    return {
+      H: H * 360,
+      S: S * 100,
+      L: L * 100,
+      A: o.A
+    };
   };
   root.RGBA_HSVA = root.RGB_HSV = function(o) {
     var _R = o.R / 255, _G = o.G / 255, _B = o.B / 255, min = Math.min(_R, _G, _B), max = Math.max(_R, _G, _B), D = max - min, H, S, V = max;
@@ -1150,11 +1216,72 @@ if (typeof Color.Space === "undefined") Color.Space = {};
       A: o.A
     };
   };
+  root.CMY_RGB = function(o) {
+    return {
+      R: Math.max(0, (1 - o.C) * 255),
+      G: Math.max(0, (1 - o.M) * 255),
+      B: Math.max(0, (1 - o.Y) * 255)
+    };
+  };
+  root.CMY_CMYK = function(o) {
+    var C = o.C;
+    var M = o.M;
+    var Y = o.Y;
+    var K = Math.min(Y, Math.min(M, Math.min(C, 1)));
+    C = Math.round((C - K) / (1 - K) * 100);
+    M = Math.round((M - K) / (1 - K) * 100);
+    Y = Math.round((Y - K) / (1 - K) * 100);
+    K = Math.round(K * 100);
+    return {
+      C: C,
+      M: M,
+      Y: Y,
+      K: K
+    };
+  };
+  root.CMYK_CMY = function(o) {
+    return {
+      C: o.C * (1 - o.K) + o.K,
+      M: o.M * (1 - o.K) + o.K,
+      Y: o.Y * (1 - o.K) + o.K
+    };
+  };
+  root.HSLA_RGBA = root.HSL_RGB = function(o) {
+    var H = o.H / 360;
+    var S = o.S / 100;
+    var L = o.L / 100;
+    var R, G, B;
+    var temp1, temp2, temp3;
+    if (S === 0) {
+      R = G = B = L;
+    } else {
+      if (L < .5) temp2 = L * (1 + S); else temp2 = L + S - S * L;
+      temp1 = 2 * L - temp2;
+      temp3 = H + 1 / 3;
+      if (temp3 < 0) temp3 += 1;
+      if (temp3 > 1) temp3 -= 1;
+      if (6 * temp3 < 1) R = temp1 + (temp2 - temp1) * 6 * temp3; else if (2 * temp3 < 1) R = temp2; else if (3 * temp3 < 2) R = temp1 + (temp2 - temp1) * (2 / 3 - temp3) * 6; else R = temp1;
+      temp3 = H;
+      if (temp3 < 0) temp3 += 1;
+      if (temp3 > 1) temp3 -= 1;
+      if (6 * temp3 < 1) G = temp1 + (temp2 - temp1) * 6 * temp3; else if (2 * temp3 < 1) G = temp2; else if (3 * temp3 < 2) G = temp1 + (temp2 - temp1) * (2 / 3 - temp3) * 6; else G = temp1;
+      temp3 = H - 1 / 3;
+      if (temp3 < 0) temp3 += 1;
+      if (temp3 > 1) temp3 -= 1;
+      if (6 * temp3 < 1) B = temp1 + (temp2 - temp1) * 6 * temp3; else if (2 * temp3 < 1) B = temp2; else if (3 * temp3 < 2) B = temp1 + (temp2 - temp1) * (2 / 3 - temp3) * 6; else B = temp1;
+    }
+    return {
+      R: R * 255,
+      G: G * 255,
+      B: B * 255,
+      A: o.A
+    };
+  };
   root.HSVA_RGBA = root.HSV_RGB = function(o) {
     var H = o.H / 360;
     var S = o.S / 100;
     var V = o.V / 100;
-    var R, G, B;
+    var R, G, B, D, A, C;
     if (S === 0) {
       R = G = B = Math.round(V * 255);
     } else {
@@ -1239,7 +1366,7 @@ Inlet = function() {
     function onSlide(event) {
       var value = String(slider.value);
       var cursor = editor.getCursor(true);
-      var number = getNumber(cursor);
+      var number = getMatch(cursor, "number");
       if (!number) return;
       var start = {
         line: cursor.line,
@@ -1254,7 +1381,7 @@ Inlet = function() {
     function onSlideMouseUp(event) {
       slider.value = 0;
       var cursor = editor.getCursor(true);
-      var number = getNumber(cursor);
+      var number = getMatch(cursor, "number");
       if (!number) return;
       var value = parseFloat(number.string);
       var sliderRange = getSliderRange(value);
@@ -1294,17 +1421,17 @@ Inlet = function() {
         sliderDiv.style.visibility = "hidden";
       }
     }
-    var pickerCallback = function(color, state, type) {
+    var pickerCallback = function(color, type) {
       var cursor = editor.getCursor();
-      var hex = getHsl(cursor);
-      if (!hex) return;
+      if (!type) return;
+      var match = getMatch(cursor, type);
       var start = {
         line: cursor.line,
-        ch: hex.start
+        ch: match.start
       };
       var end = {
         line: cursor.line,
-        ch: hex.end
+        ch: match.end
       };
       editor.replaceRange(color, start, end);
     };
@@ -1313,26 +1440,37 @@ Inlet = function() {
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
-      var number = getNumber(cursor);
-      var hexMatch = getHsl(cursor);
+      var numberMatch = getMatch(cursor, "number");
+      var hslMatch = getMatch(cursor, "hsl");
+      var hexMatch = getMatch(cursor, "hex");
+      var pickerTop = cursorOffset.top - topOffset;
+      if (cursorOffset.top < topBoundary) {
+        pickerTop = cursorOffset.top + bottomOffset;
+      }
+      var pickerLeft = cursorOffset.left - leftOffset;
       if (hexMatch) {
         var color = hexMatch.string;
-        var top = cursorOffset.top - topOffset;
-        if (cursorOffset.top < topBoundary) {
-          top = cursorOffset.top + bottomOffset;
-        }
-        var left = cursorOffset.left - leftOffset;
         picker = new thistle.Picker(color);
         picker.setCSS(color);
-        picker.presentModal(left, top);
+        picker.presentModal(pickerLeft, pickerTop);
         picker.on("changed", function() {
           picked = picker.getCSS();
-          pickerCallback(picked);
+          picked = Color.Space(picked, "W3>HSL>RGB>HEX24>W3");
+          pickerCallback(picked, "hex");
         });
         sliderDiv.style.visibility = "hidden";
-      } else if (number) {
+      } else if (hslMatch) {
+        var color = hslMatch.string;
+        picker = new thistle.Picker(color);
+        picker.setCSS(color);
+        picker.presentModal(pickerLeft, pickerTop);
+        picker.on("changed", function() {
+          picked = picker.getCSS();
+          pickerCallback(picked, "hsl");
+        });
+      } else if (numberMatch) {
         slider.value = 0;
-        var value = parseFloat(number.string);
+        var value = parseFloat(numberMatch.string);
         var sliderRange = getSliderRange(value);
         slider.setAttribute("value", value);
         slider.setAttribute("step", sliderRange.step);
@@ -1375,51 +1513,24 @@ Inlet = function() {
         step: step
       };
     }
-    function getHsl(cursor) {
-      var line = editor.getLine(cursor.line);
-      var re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
-      var match = re.exec(line);
-      while (match) {
-        var val = match[0];
-        var len = val.length;
-        var start = match.index;
-        var end = match.index + len;
-        if (cursor.ch >= start && cursor.ch <= end) {
-          match = null;
-          return {
-            start: start,
-            end: end,
-            string: val
-          };
-        }
-        match = re.exec(line);
+    function getMatch(cursor, type) {
+      if (!type) return;
+      var re;
+      switch (type.toLowerCase()) {
+       case "hsl":
+        re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
+        break;
+       case "hex":
+        re = /#[a-fA-F0-9]{3,6}/g;
+        break;
+       case "number":
+        re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+        break;
+       default:
+        throw new Error("invalid match selection");
+        return;
       }
-      return;
-    }
-    function getHex(cursor) {
       var line = editor.getLine(cursor.line);
-      var re = /#[a-fA-F0-9]{3,6}/g;
-      var match = re.exec(line);
-      while (match) {
-        var val = match[0];
-        var len = val.length;
-        var start = match.index;
-        var end = match.index + len;
-        if (cursor.ch >= start && cursor.ch <= end) {
-          match = null;
-          return {
-            start: start,
-            end: end,
-            string: val
-          };
-        }
-        match = re.exec(line);
-      }
-      return;
-    }
-    function getNumber(cursor) {
-      var line = editor.getLine(cursor.line);
-      var re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
       var match = re.exec(line);
       while (match) {
         var val = match[0];
