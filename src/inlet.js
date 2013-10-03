@@ -123,7 +123,6 @@ Inlet = (function() {
         editor.replaceRange(color, start, end);
 
     }
-    picker = new thistle.Picker("#ffffff")
 
     //Handle clicks
     function onClick(ev) {
@@ -151,6 +150,7 @@ Inlet = (function() {
         
         //picker.toggle(true);
         //console.log(color)
+        picker = new thistle.Picker(color) // moved to here so that old color shows
         picker.setCSS(color)
         picker.presentModal(left,top)
         picker.on('changed',function() {

@@ -1308,7 +1308,6 @@ Inlet = function() {
       };
       editor.replaceRange(color, start, end);
     };
-    picker = new thistle.Picker("#ffffff");
     function onClick(ev) {
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
@@ -1322,6 +1321,7 @@ Inlet = function() {
           top = cursorOffset.top + bottomOffset;
         }
         var left = cursorOffset.left - leftOffset;
+        picker = new thistle.Picker(color);
         picker.setCSS(color);
         picker.presentModal(left, top);
         picker.on("changed", function() {
