@@ -150,12 +150,12 @@ Inlet = (function() {
         */
         
         //picker.toggle(true);
-        console.log(color)
+        //console.log(color)
         picker.setCSS(color)
         picker.presentModal(left,top)
         picker.on('changed',function() {
           picked = picker.getCSS()
-          console.log(picked)
+          //console.log(picked)
           pickerCallback(picked)
         })
 
@@ -224,7 +224,6 @@ Inlet = (function() {
     function getHsl(cursor) {
       var line = editor.getLine(cursor.line);
       var re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
-      console.log(line)
       var match = re.exec(line);
       while(match) {
         var val = match[0];
