@@ -123,6 +123,9 @@ Inlet = (function() {
         editor.replaceRange(color, start, end);
 
     }
+    // this will be overwritten if hslMatch hits
+    // so that the "old color view" will initilize correctly
+    picker = new thistle.Picker("#ffffff")
 
     //Handle clicks
     function onClick(ev) {
