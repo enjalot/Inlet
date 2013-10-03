@@ -1216,7 +1216,7 @@ Inlet = function() {
     if (!options.picker) options.picker = {};
     if (!options.slider) options.slider = {};
     var container = options.container || document.body;
-    var topOffset = options.picker.topOffset || 210;
+    var topOffset = options.picker.topOffset || 220;
     var bottomOffset = options.picker.bottomOffset || 16;
     var topBoundary = options.picker.topBoundary || 250;
     var leftOffset = options.picker.leftOffset || 75;
@@ -1294,12 +1294,27 @@ Inlet = function() {
         sliderDiv.style.visibility = "hidden";
       }
     }
+    var pickerCallback = function(color, state, type) {
+      var cursor = editor.getCursor();
+      var hex = getHsl(cursor);
+      if (!hex) return;
+      var start = {
+        line: cursor.line,
+        ch: hex.start
+      };
+      var end = {
+        line: cursor.line,
+        ch: hex.end
+      };
+      editor.replaceRange(color, start, end);
+    };
+    picker = new thistle.Picker("#ffffff");
     function onClick(ev) {
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
-      var hexMatch = getHex(cursor);
+      var hexMatch = getHsl(cursor);
       if (hexMatch) {
         var color = hexMatch.string;
         var top = cursorOffset.top - topOffset;
@@ -1308,8 +1323,13 @@ Inlet = function() {
         }
         var left = cursorOffset.left - leftOffset;
         console.log(color);
-        picker = new thistle.Picker(color);
-        picker.presentModal(left, top, color);
+        picker.setCSS(color);
+        picker.presentModal(left, top);
+        picker.on("changed", function() {
+          picked = picker.getCSS();
+          console.log(picked);
+          pickerCallback(picked);
+        });
         sliderDiv.style.visibility = "hidden";
       } else if (number) {
         slider.value = 0;
@@ -1355,6 +1375,28 @@ Inlet = function() {
         max: max,
         step: step
       };
+    }
+    function getHsl(cursor) {
+      var line = editor.getLine(cursor.line);
+      var re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
+      console.log(line);
+      var match = re.exec(line);
+      while (match) {
+        var val = match[0];
+        var len = val.length;
+        var start = match.index;
+        var end = match.index + len;
+        if (cursor.ch >= start && cursor.ch <= end) {
+          match = null;
+          return {
+            start: start,
+            end: end,
+            string: val
+          };
+        }
+        match = re.exec(line);
+      }
+      return;
     }
     function getHex(cursor) {
       var line = editor.getLine(cursor.line);

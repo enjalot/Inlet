@@ -10,7 +10,7 @@ Inlet = (function() {
     var container = options.container || document.body;
 
     // TODO: document/consider renaming
-    var topOffset = options.picker.topOffset || 210;
+    var topOffset = options.picker.topOffset || 220;
     var bottomOffset = options.picker.bottomOffset || 16;
     var topBoundary = options.picker.topBoundary || 250;
     var leftOffset = options.picker.leftOffset || 75;
@@ -110,20 +110,20 @@ Inlet = (function() {
       container: container,
       color: "#643263",// accepts rgba(), or #hex
       display: false,
-      size: 150,
-      callback: function(rgba, state, type) {
-        var newcolor = Color.Space(rgba, "RGB>STRING");
+      size: 150,*/
+    var pickerCallback = function(color, state, type) {
+        //var newcolor = Color.Space(rgba, "RGB>STRING");
         //set the cursor to desired location
         var cursor = editor.getCursor();
 
-        var hex = getHex(cursor);
+        var hex = getHsl(cursor);
         if(!hex) return;
         var start = {"line":cursor.line, "ch":hex.start};
         var end = {"line":cursor.line, "ch":hex.end};
-        editor.replaceRange("#" + newcolor.toUpperCase(), start, end);
+        editor.replaceRange(color, start, end);
 
-      }
-    });*/
+    }
+    picker = new thistle.Picker("#ffffff")
 
     //Handle clicks
     function onClick(ev) {
@@ -132,7 +132,7 @@ Inlet = (function() {
       cursorOffset = editor.cursorCoords(true, "page");
       var number = getNumber(cursor);
 
-      var hexMatch = getHex(cursor);
+      var hexMatch = getHsl(cursor);
       if(hexMatch) {
         //turn on color picker
         var color = hexMatch.string;
@@ -151,8 +151,14 @@ Inlet = (function() {
         
         //picker.toggle(true);
         console.log(color)
-        picker = new thistle.Picker(color)
-        picker.presentModal(left,top,color)
+        picker.setCSS(color)
+        picker.presentModal(left,top)
+        picker.on('changed',function() {
+          picked = picker.getCSS()
+          console.log(picked)
+          pickerCallback(picked)
+        })
+
         sliderDiv.style.visibility = "hidden";
       } else if(number) {
         //picker.toggle(false);
@@ -215,6 +221,30 @@ Inlet = (function() {
       }
     }
     
+    function getHsl(cursor) {
+      var line = editor.getLine(cursor.line);
+      var re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
+      console.log(line)
+      var match = re.exec(line);
+      while(match) {
+        var val = match[0];
+        var len = val.length;
+        var start = match.index;
+        var end = match.index + len;
+        if(cursor.ch >= start && cursor.ch <= end) {
+          match = null;
+          return {
+            start: start,
+            end: end,
+            string: val
+          };
+        }
+        match = re.exec(line);
+      }
+      return;
+
+    }
+
     function getHex(cursor) {
       //we do a regex over a whole line, and return the number which the cursor touches
       var line = editor.getLine(cursor.line);
