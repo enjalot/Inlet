@@ -131,7 +131,8 @@ Inlet = (function() {
       var pickerTop = (cursorOffset.top - topOffset);
       if (cursorOffset.top < topBoundary) {pickerTop = (cursorOffset.top + bottomOffset)}
       var pickerLeft = cursorOffset.left - leftOffset;
-
+      
+      sliderDiv.style.visibility = "hidden";
 
       if(hexMatch) {
         var color = hexMatch.string;
@@ -146,7 +147,6 @@ Inlet = (function() {
           picked = Color.Space(picked, "W3>HSL>RGB>HEX24>W3");
           pickerCallback(picked,'hex')
         })
-        sliderDiv.style.visibility = "hidden";
       } else if (hslMatch) {
         var color = hslMatch.string;
         picker = new thistle.Picker(color)
@@ -168,18 +168,16 @@ Inlet = (function() {
 
         //setup slider position
         // position slider centered above the cursor
-                
         var sliderTop = cursorOffset.top - y_offset;
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
         var sliderLeft = cursorOffset.left - sliderWidth/2;
-
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
 
         sliderDiv.style.visibility = "visible";
       } else {
-        sliderDiv.style.visibility = "hidden";
+
       }
     }
     
