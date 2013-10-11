@@ -127,6 +127,7 @@ Inlet = (function() {
       var numberMatch = getMatch(cursor, 'number');
       var hslMatch = getMatch(cursor, 'hsl');
       var hexMatch = getMatch(cursor, 'hex');
+      var rgbMatch = getMatch(cursor, 'rgb');
 
       var pickerTop = (cursorOffset.top - topOffset);
       if (cursorOffset.top < topBoundary) {pickerTop = (cursorOffset.top + bottomOffset)}
@@ -155,6 +156,17 @@ Inlet = (function() {
         picker.on('changed',function() {
           picked = picker.getCSS()
           pickerCallback(picked,'hsl')
+        })
+      } else if(rgbMatch) {
+        var color = rgbMatch.string;
+        picker = new thistle.Picker(color)
+        picker.setCSS(color) // current color selection
+        picker.presentModal(pickerLeft,pickerTop)
+        picker.on('changed',function() {
+          picked = picker.getCSS()
+          //translate hsl return to rgb
+          picked = Color.Space(picked, "W3>HSL>RGB>W3");
+          pickerCallback(picked,'rgb')
         })
       } else if(numberMatch) {
         slider.value = 0;
@@ -217,6 +229,11 @@ Inlet = (function() {
         case 'hsl':
           re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
           break;
+
+        case 'rgb':
+          re = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/;
+          break;
+
         case 'hex':
           re = /#[a-fA-F0-9]{3,6}/g;
           break;
@@ -229,7 +246,6 @@ Inlet = (function() {
           throw new Error("invalid match selection");
           return;
       }
-
       var line = editor.getLine(cursor.line);
       var match = re.exec(line);
       while(match) {
