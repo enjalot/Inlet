@@ -1,4 +1,5 @@
-Inlet is a "plugin" for CodeMirror2 which pops up a slider whenever you click on a number or a color picker when you click on a Hex string (i.e. "#ff0000")
+# Inlet
+Inlet is a "plugin" for CodeMirror2 which pops up a slider whenever you click on a number or a color picker when you click on a Hex string (i.e. "#ff0000").  You can also click on hsl strings (i.e. "hsl(100,100%,90%") to get the color picker.
 
 See an example at http://enjalot.github.com/Inlet
 
@@ -8,10 +9,9 @@ This project is inspired by Bret Victor's talk ["Inventing on Principle"](https:
 
 The the slider code is originally adapted from Gabriel Florit's [Water project](http://gabrielflor.it/water) the predecesor for [Livecoding.io](http://livecoding.io)
 
-The [Color Picker library](https://github.com/mudcube/Color-Picker) is used to provide the color picker.
+The [Color Picker Thistle](https://github.com/nornagon/thistle/) is used to provide the color picker, and [Color.Space.js](https://github.com/mudcube/Color.Space.js) translates between color spaces.
 
 This project is used in enjalot's [Tributary](http://tributary.io)  
-
 
 # Usage
 
@@ -28,11 +28,6 @@ var editor = CodeMirror('#editor', ...)
 Inlet(editor)
 ```
 
-Unfortunately input type=range is not currently supported in FireFox  
-http://html5test.com/compare/feature/form-range-element.html    
-you may want to try:  
-http://frankyan.com/labs/html5slider/  
-
 # Development
 
 Install
@@ -40,5 +35,7 @@ Install
 npm Install
 make
 ```
+
+Test cases are availible in test.html
 
 Enjoy!
