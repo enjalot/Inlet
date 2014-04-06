@@ -48,6 +48,7 @@ Inlet = (function() {
       if(!number) return;
       var start = {"line":cursor.line, "ch":number.start};
       var end = {"line":cursor.line, "ch":number.end};
+      editor.dragging = true;
       editor.replaceRange(value, start, end);
     }
 
@@ -63,6 +64,7 @@ Inlet = (function() {
       slider.setAttribute("min", sliderRange.min);
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
+      editor.dragging = false;
     }
 
     var LEFT = 37;
@@ -110,7 +112,11 @@ Inlet = (function() {
         var match = getMatch(cursor, type);
         var start = {"line":cursor.line, "ch":match.start};
         var end = {"line":cursor.line, "ch":match.end};
+        editor.picking = true
         editor.replaceRange(color, start, end);
+        setTimeout(function() {
+          editor.picking = false;
+        }, 100);
     }
     // this will be overwritten if hslMatch hits
     // so that the "old color view" will initilize correctly
