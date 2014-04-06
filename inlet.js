@@ -896,7 +896,6 @@ Inlet = function() {
     slider.addEventListener("change", onSlide);
     slider.addEventListener("mouseup", onSlideMouseUp);
     sliderDiv.appendChild(slider);
-    console.log("HIII");
     function onSlide(event) {
       var value = String(slider.value);
       var cursor = editor.getCursor(true);
@@ -912,7 +911,6 @@ Inlet = function() {
       };
       editor.dragging = true;
       editor.replaceRange(value, start, end);
-      console.log("EDITOR", editor);
     }
     function onSlideMouseUp(event) {
       slider.value = 0;
