@@ -36,6 +36,7 @@ Inlet = (function() {
     slider.className = "range";
     slider.setAttribute("type", "range");
     slider.addEventListener("input", onSlide);
+    slider.addEventListener("change", onSlide); // for Firefox
     slider.addEventListener("mouseup", onSlideMouseUp);
     //slider.style.width = "inherit";
     sliderDiv.appendChild(slider);
