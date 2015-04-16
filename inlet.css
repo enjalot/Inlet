@@ -35,6 +35,8 @@
 .inlet_slider input[type="range"] {
   -webkit-appearance: none;
   -moz-appearance: none;
+  background: none;
+  outline: none;
 }
 @-moz-document url-prefix() {
   .inlet_slider input[type="range"] {
