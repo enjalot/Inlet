@@ -37,10 +37,10 @@ Inlet = (function() {
     slider.setAttribute("type", "range");
     slider.addEventListener("input", onSlide);
     slider.addEventListener("change", onSlide); // for Firefox
-    slider.addEventListener("mouseup", onSlideMouseUp);
-    //slider.style.width = "inherit";
+    // we don't enable this behavior in FF because it's slider is buggy
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+    if(!isFirefox) slider.addEventListener("mouseup", onSlideMouseUp);
     sliderDiv.appendChild(slider);
-
 
     function onSlide(event) {
       var value = String(slider.value);

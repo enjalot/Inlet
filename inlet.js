@@ -895,7 +895,8 @@ Inlet = function() {
     slider.setAttribute("type", "range");
     slider.addEventListener("input", onSlide);
     slider.addEventListener("change", onSlide);
-    slider.addEventListener("mouseup", onSlideMouseUp);
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+    if (!isFirefox) slider.addEventListener("mouseup", onSlideMouseUp);
     sliderDiv.appendChild(slider);
     function onSlide(event) {
       var value = String(slider.value);
