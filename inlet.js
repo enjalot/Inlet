@@ -876,11 +876,16 @@ Inlet = function() {
     if (!options.picker) options.picker = {};
     if (!options.slider) options.slider = {};
     var container = options.container || document.body;
+    console.log("OPTIONS", options);
     var topOffset = options.picker.topOffset || 220;
     var bottomOffset = options.picker.bottomOffset || 16;
     var topBoundary = options.picker.topBoundary || 250;
     var leftOffset = options.picker.leftOffset || 75;
-    var y_offset = options.slider.yOffset || 15;
+    var yOffset = options.slider.yOffset || 15;
+    var xOffset = options.slider.xOffset || 0;
+    var horizontalMode = options.horizontalMode || "page";
+    var sliderCB = options.slider.callback || function(active) {};
+    var pickerCB = options.picker.callback || function(active) {};
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
     editor.setOption("onKeyEvent", onKeyDown);
@@ -981,6 +986,7 @@ Inlet = function() {
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
+      var leftBase = editor.cursorCoords(true, horizontalMode).left;
       var numberMatch = getMatch(cursor, "number");
       var hslMatch = getMatch(cursor, "hsl");
       var hexMatch = getMatch(cursor, "hex");
@@ -989,7 +995,7 @@ Inlet = function() {
       if (cursorOffset.top < topBoundary) {
         pickerTop = cursorOffset.top + bottomOffset;
       }
-      var pickerLeft = cursorOffset.left - leftOffset;
+      var pickerLeft = leftBase - leftOffset;
       sliderDiv.style.visibility = "hidden";
       if (hexMatch) {
         var color = hexMatch.string;
@@ -1029,10 +1035,12 @@ Inlet = function() {
         slider.setAttribute("min", sliderRange.min);
         slider.setAttribute("max", sliderRange.max);
         slider.value = value;
-        var sliderTop = cursorOffset.top - y_offset;
+        var sliderTop = cursorOffset.top - yOffset;
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
-        var sliderLeft = cursorOffset.left - sliderWidth / 2;
+        var sliderLeft = leftBase - sliderWidth / 2 + xOffset;
+        console.log("slider width", sliderWidth, sliderWidth / 2);
+        console.log("slider left", sliderLeft);
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
         sliderDiv.style.visibility = "visible";
