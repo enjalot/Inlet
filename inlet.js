@@ -1082,7 +1082,7 @@ Inlet = function() {
         re = /#[a-fA-F0-9]{3,6}/g;
         break;
        case "number":
-        re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+        re = /[-]?\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
         break;
        default:
         throw new Error("invalid match selection");

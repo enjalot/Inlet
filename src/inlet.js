@@ -255,7 +255,7 @@ Inlet = (function() {
           break;
 
         case 'number':
-          re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+          re = /[-]?\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
           break;
 
         default:
