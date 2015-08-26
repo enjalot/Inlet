@@ -876,7 +876,6 @@ Inlet = function() {
     if (!options.picker) options.picker = {};
     if (!options.slider) options.slider = {};
     var container = options.container || document.body;
-    console.log("OPTIONS", options);
     var topOffset = options.picker.topOffset || 220;
     var bottomOffset = options.picker.bottomOffset || 16;
     var topBoundary = options.picker.topBoundary || 250;
@@ -1039,8 +1038,6 @@ Inlet = function() {
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
         var sliderLeft = leftBase - sliderWidth / 2 + xOffset;
-        console.log("slider width", sliderWidth, sliderWidth / 2);
-        console.log("slider left", sliderLeft);
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
         sliderDiv.style.visibility = "visible";
@@ -1079,7 +1076,7 @@ Inlet = function() {
         re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
         break;
        case "rgb":
-        re = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/;
+        re = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/g;
         break;
        case "hex":
         re = /#[a-fA-F0-9]{3,6}/g;
