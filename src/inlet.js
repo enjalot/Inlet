@@ -17,7 +17,9 @@ Inlet = (function() {
 
     var yOffset = options.slider.yOffset || 15;
     var xOffset = options.slider.xOffset || 0;
+    var sliderWidth = options.slider.width;
     var horizontalMode = options.horizontalMode || "page"; // other options include local and window
+    var fixedContainer = options.fixedContainer; // used if the CM is inside a position:fixed container
 
     // we can trigger a callback when a slider/picker is activated/deactivated
     var sliderCB = options.slider.callback || function(active) {};
@@ -25,7 +27,7 @@ Inlet = (function() {
 
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
-    //wrapper.addEventListener("keydown", onKeyDown);
+    document.body.addEventListener("mousedown", windowOnClick);
     editor.setOption("onKeyEvent", onKeyDown);
 
     //make the slider
@@ -33,7 +35,14 @@ Inlet = (function() {
     sliderDiv.className = "inlet_slider";
     //some styles are necessary for behavior
     sliderDiv.style.visibility = "hidden";
-    sliderDiv.style.position = "absolute";
+    if(sliderWidth) { 
+      sliderDiv.style.width = sliderWidth;
+    }
+    if(fixedContainer) {
+      sliderDiv.style.position = "fixed";
+    } else {
+      sliderDiv.style.position = "absolute";
+    }
     sliderDiv.style.top = 0;
     container.appendChild(sliderDiv);
     //TODO: figure out how to capture key events when slider has focus
@@ -73,6 +82,13 @@ Inlet = (function() {
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
       editor.dragging = false;
+    }
+
+    var clickTarget;
+    function windowOnClick(evt) {
+      if(evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider) return;
+      // TODO: we should really probably clean up the slider/colorpicker
+      sliderDiv.style.visibility = "hidden";
     }
 
     var LEFT = 37;
@@ -133,10 +149,16 @@ Inlet = (function() {
 
     //Handle clicks
     function onClick(ev) {
+      // we track when we've clicked on a potential number/color for use in the windowOnClick function
+      clickTarget = ev.target;
+      console.log("CLICK TARGET", clickTarget)
+      // we get the cursor and its coordinates for when we need to place the slider/color picker
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var leftBase = editor.cursorCoords(true, horizontalMode).left;
+      console.log("CURSOR OFFSET", cursorOffset.left)
+      console.log("LEFT BASE", leftBase)
 
       // see if there is a match on the cursor click
       var numberMatch = getMatch(cursor, 'number');
@@ -200,6 +222,14 @@ Inlet = (function() {
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
         var sliderLeft = leftBase - sliderWidth/2 + xOffset;
+        /*
+        var sliderLeft;
+        if(fixedContainer) {
+          sliderLeft = fixedContainer - leftBase - sliderWidth/2 + xOffset;
+        } else {
+          sliderLeft = leftBase - sliderWidth/2 + xOffset;
+        }
+        */
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
 

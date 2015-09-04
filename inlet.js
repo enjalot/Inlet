@@ -882,16 +882,26 @@ Inlet = function() {
     var leftOffset = options.picker.leftOffset || 75;
     var yOffset = options.slider.yOffset || 15;
     var xOffset = options.slider.xOffset || 0;
+    var sliderWidth = options.slider.width;
     var horizontalMode = options.horizontalMode || "page";
+    var fixedContainer = options.fixedContainer;
     var sliderCB = options.slider.callback || function(active) {};
     var pickerCB = options.picker.callback || function(active) {};
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
+    document.body.addEventListener("mousedown", windowOnClick);
     editor.setOption("onKeyEvent", onKeyDown);
     var sliderDiv = document.createElement("div");
     sliderDiv.className = "inlet_slider";
     sliderDiv.style.visibility = "hidden";
-    sliderDiv.style.position = "absolute";
+    if (sliderWidth) {
+      sliderDiv.style.width = sliderWidth;
+    }
+    if (fixedContainer) {
+      sliderDiv.style.position = "fixed";
+    } else {
+      sliderDiv.style.position = "absolute";
+    }
     sliderDiv.style.top = 0;
     container.appendChild(sliderDiv);
     var slider = document.createElement("input");
@@ -931,6 +941,12 @@ Inlet = function() {
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
       editor.dragging = false;
+    }
+    var clickTarget;
+    function windowOnClick(evt) {
+      console.log("CLICK", evt);
+      if (evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider) return;
+      sliderDiv.style.visibility = "hidden";
     }
     var LEFT = 37;
     var UP = 38;
@@ -982,10 +998,14 @@ Inlet = function() {
     };
     picker = new thistle.Picker("#ffffff");
     function onClick(ev) {
+      clickTarget = ev.target;
+      console.log("CLICK TARGET", clickTarget);
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var leftBase = editor.cursorCoords(true, horizontalMode).left;
+      console.log("CURSOR OFFSET", cursorOffset.left);
+      console.log("LEFT BASE", leftBase);
       var numberMatch = getMatch(cursor, "number");
       var hslMatch = getMatch(cursor, "hsl");
       var hexMatch = getMatch(cursor, "hex");
