@@ -151,14 +151,11 @@ Inlet = (function() {
     function onClick(ev) {
       // we track when we've clicked on a potential number/color for use in the windowOnClick function
       clickTarget = ev.target;
-      console.log("CLICK TARGET", clickTarget)
       // we get the cursor and its coordinates for when we need to place the slider/color picker
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var leftBase = editor.cursorCoords(true, horizontalMode).left;
-      console.log("CURSOR OFFSET", cursorOffset.left)
-      console.log("LEFT BASE", leftBase)
 
       // see if there is a match on the cursor click
       var numberMatch = getMatch(cursor, 'number');

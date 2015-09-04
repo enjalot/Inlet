@@ -944,7 +944,6 @@ Inlet = function() {
     }
     var clickTarget;
     function windowOnClick(evt) {
-      console.log("CLICK", evt);
       if (evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider) return;
       sliderDiv.style.visibility = "hidden";
     }
@@ -999,13 +998,10 @@ Inlet = function() {
     picker = new thistle.Picker("#ffffff");
     function onClick(ev) {
       clickTarget = ev.target;
-      console.log("CLICK TARGET", clickTarget);
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
       var leftBase = editor.cursorCoords(true, horizontalMode).left;
-      console.log("CURSOR OFFSET", cursorOffset.left);
-      console.log("LEFT BASE", leftBase);
       var numberMatch = getMatch(cursor, "number");
       var hslMatch = getMatch(cursor, "hsl");
       var hexMatch = getMatch(cursor, "hex");
