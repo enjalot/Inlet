@@ -3,10 +3,12 @@ Inlet = (function() {
     var editor = ed;
     var slider;
     var picker;
+    var clicker;
 
     if(!options) options = {};
     if(!options.picker) options.picker = {};
     if(!options.slider) options.slider = {};
+    if(!options.clicker) options.clicker = {};
     var container = options.container || document.body;
 
     // TODO: document/consider renaming
@@ -24,18 +26,42 @@ Inlet = (function() {
     // we can trigger a callback when a slider/picker is activated/deactivated
     var sliderCB = options.slider.callback || function(active) {};
     var pickerCB = options.picker.callback || function(active) {};
+    var clickerCB = options.clicker.callback || function(active) {};
 
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
     document.body.addEventListener("mousedown", windowOnClick);
     editor.setOption("onKeyEvent", onKeyDown);
 
+    //make the clicker
+    var clickerDiv = document.createElement("div");
+    clickerDiv.className = "inlet_clicker";
+    clickerDiv.style.visibility = "hidden";
+    clickerDiv.style.position = "absolute"
+    container.appendChild(clickerDiv);
+    var clicker = document.createElement("input");
+    clicker.className = "checkbox";
+    clicker.setAttribute("type","checkbox");
+    clicker.addEventListener("change", onClicker);
+    clickerDiv.appendChild(clicker)
+
+    //what to do when the clicker is clicked
+    function onClicker(event) {
+      var value = String(clicker.checked);
+      var cursor = editor.getCursor(true);
+      var boolean = getMatch(cursor,'boolean');
+      if(!boolean) return;
+      var start = {"line":cursor.line, "ch":boolean.start};
+      var end = {"line":cursor.line, "ch":boolean.end};
+      editor.replaceRange(value, start, end);
+    }
+
     //make the slider
     var sliderDiv = document.createElement("div");
     sliderDiv.className = "inlet_slider";
     //some styles are necessary for behavior
     sliderDiv.style.visibility = "hidden";
-    if(sliderWidth) { 
+    if(sliderWidth) {
       sliderDiv.style.width = sliderWidth;
     }
     if(fixedContainer) {
@@ -86,9 +112,10 @@ Inlet = (function() {
 
     var clickTarget;
     function windowOnClick(evt) {
-      if(evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider) return;
+      if(evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider || evt.target === clickerDiv || evt.target === clicker) return;
       // TODO: we should really probably clean up the slider/colorpicker
       sliderDiv.style.visibility = "hidden";
+      clickerDiv.style.visibility = "hidden";
     }
 
     var LEFT = 37;
@@ -162,17 +189,19 @@ Inlet = (function() {
       var hslMatch = getMatch(cursor, 'hsl');
       var hexMatch = getMatch(cursor, 'hex');
       var rgbMatch = getMatch(cursor, 'rgb');
+      var booleanMatch = getMatch(cursor, 'boolean');
 
       var pickerTop = (cursorOffset.top - topOffset);
       if (cursorOffset.top < topBoundary) {pickerTop = (cursorOffset.top + bottomOffset)}
 
       var pickerLeft = leftBase - leftOffset;
-      
+
       sliderDiv.style.visibility = "hidden";
+      clickerDiv.style.visibility = "hidden";
 
       if(hexMatch) {
         var color = hexMatch.string;
-        // reconstructing the picker so that the previous color 
+        // reconstructing the picker so that the previous color
         // element shows the color clicked
         picker = new thistle.Picker(color)
         picker.setCSS(color) // current color selection
@@ -231,16 +260,40 @@ Inlet = (function() {
         sliderDiv.style.left = sliderLeft + "px";
 
         sliderDiv.style.visibility = "visible";
+      } else if(booleanMatch) {
+
+        var clickerTop = cursorOffset.top - yOffset;
+        var clickerStyle = window.getComputedStyle(clickerDiv);
+        var clickerWidth = getPixels(clickerStyle.width);
+        var clickerLeft = leftBase - clickerWidth/2 + xOffset;
+
+        var value = Boolean(booleanMatch.string);
+        clicker.checked = value
+
+
+        /*
+        var sliderLeft;
+        if(fixedContainer) {
+          sliderLeft = fixedContainer - leftBase - sliderWidth/2 + xOffset;
+        } else {
+          sliderLeft = leftBase - sliderWidth/2 + xOffset;
+        }
+        */
+        clickerDiv.style.top = clickerTop - 3 + "px";
+        clickerDiv.style.left = clickerLeft + "px";
+
+        clickerDiv.style.visibility = "visible";
+
       } else {
 
       }
     }
-    
+
     function getSliderRange(value) {
       //this could be substituted out for other heuristics
       var range, step, sliderMin, sliderMax;
       //these values were chosen by Gabriel Florit for his livecoding project, they work really well!
-      if (value === 0) { 
+      if (value === 0) {
         range = [-100, 100];
       } else {
         range = [-value * 3, value * 5];
@@ -264,11 +317,15 @@ Inlet = (function() {
         step: step
       }
     }
-    
+
     function getMatch(cursor, type) {
       if (!type) return;
       var re;
       switch(type.toLowerCase()) {
+        case 'boolean':
+          re = /true|false/g
+          break;
+
         case 'hsl':
           re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
           break;
@@ -310,7 +367,7 @@ Inlet = (function() {
     }
 
   }
-    
+
   function getPixels(style) {
     var pix = 0;
     if(style.length > 2 ) {
@@ -318,7 +375,7 @@ Inlet = (function() {
     }
     if(!pix) pix = 0;
     return pix;
-  } 
+  }
   function getOffset( el ) {
     var _x = 0;
     var _y = 0;
@@ -329,8 +386,8 @@ Inlet = (function() {
     }
     return { top: _y, left: _x };
 }
-  
-  
+
+
 
   return inlet;
 
