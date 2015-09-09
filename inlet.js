@@ -1094,7 +1094,7 @@ Inlet = function() {
         var clickerWidth = getPixels(clickerStyle.width);
         var clickerLeft = leftBase - clickerWidth / 2 + xOffset;
         var value = Boolean(booleanMatch.string);
-        clicker.checked = value;
+        clicker.setAttribute("checked", value);
         clickerDiv.style.top = clickerTop - 3 + "px";
         clickerDiv.style.left = clickerLeft + "px";
         clickerDiv.style.visibility = "visible";

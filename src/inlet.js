@@ -50,7 +50,7 @@ Inlet = (function() {
       var value = String(clicker.checked);
       var cursor = editor.getCursor(true);
       var boolean = getMatch(cursor,'boolean');
-      if(!boolean) return;
+      if (!boolean) return;
       var start = {"line":cursor.line, "ch":boolean.start};
       var end = {"line":cursor.line, "ch":boolean.end};
       editor.replaceRange(value, start, end);
@@ -268,7 +268,7 @@ Inlet = (function() {
         var clickerLeft = leftBase - clickerWidth/2 + xOffset;
 
         var value = Boolean(booleanMatch.string);
-        clicker.checked = value
+        clicker.setAttribute("checked", value)
 
 
         /*
