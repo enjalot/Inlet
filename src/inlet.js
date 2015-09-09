@@ -266,19 +266,28 @@ Inlet = (function() {
         var clickerStyle = window.getComputedStyle(clickerDiv);
         var clickerWidth = getPixels(clickerStyle.width);
         var clickerLeft = leftBase - clickerWidth/2 + xOffset;
+        var value = JSON.parse(booleanMatch.string);
 
-        var value = Boolean(booleanMatch.string);
-        clicker.setAttribute("checked", value)
-
-
-        /*
-        var sliderLeft;
-        if(fixedContainer) {
-          sliderLeft = fixedContainer - leftBase - sliderWidth/2 + xOffset;
-        } else {
-          sliderLeft = leftBase - sliderWidth/2 + xOffset;
+        if(value) {
+          // sometimes adding the attribute checked is not enough
+          clickerDiv.removeChild(clicker)
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type","checkbox");
+          clicker.setAttribute("checked","checked")
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker)
         }
-        */
+        else {
+          // sometimes removing the attribute checked is not enough
+          clickerDiv.removeChild(clicker)
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type","checkbox");
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker)
+        }
+
         clickerDiv.style.top = clickerTop - 3 + "px";
         clickerDiv.style.left = clickerLeft + "px";
 
@@ -347,6 +356,7 @@ Inlet = (function() {
           return;
       }
       var line = editor.getLine(cursor.line);
+
       var match = re.exec(line);
       while(match) {
         var val = match[0];

@@ -1093,8 +1093,23 @@ Inlet = function() {
         var clickerStyle = window.getComputedStyle(clickerDiv);
         var clickerWidth = getPixels(clickerStyle.width);
         var clickerLeft = leftBase - clickerWidth / 2 + xOffset;
-        var value = Boolean(booleanMatch.string);
-        clicker.setAttribute("checked", value);
+        var value = JSON.parse(booleanMatch.string);
+        if (value) {
+          clickerDiv.removeChild(clicker);
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type", "checkbox");
+          clicker.setAttribute("checked", "checked");
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker);
+        } else {
+          clickerDiv.removeChild(clicker);
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type", "checkbox");
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker);
+        }
         clickerDiv.style.top = clickerTop - 3 + "px";
         clickerDiv.style.left = clickerLeft + "px";
         clickerDiv.style.visibility = "visible";
