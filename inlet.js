@@ -872,29 +872,73 @@ Inlet = function() {
     var editor = ed;
     var slider;
     var picker;
+    var clicker;
     if (!options) options = {};
     if (!options.picker) options.picker = {};
     if (!options.slider) options.slider = {};
+    if (!options.clicker) options.clicker = {};
     var container = options.container || document.body;
     var topOffset = options.picker.topOffset || 220;
     var bottomOffset = options.picker.bottomOffset || 16;
     var topBoundary = options.picker.topBoundary || 250;
     var leftOffset = options.picker.leftOffset || 75;
-    var y_offset = options.slider.yOffset || 15;
+    var yOffset = options.slider.yOffset || 15;
+    var xOffset = options.slider.xOffset || 0;
+    var sliderWidth = options.slider.width;
+    var horizontalMode = options.horizontalMode || "page";
+    var fixedContainer = options.fixedContainer;
+    var sliderCB = options.slider.callback || function(active) {};
+    var pickerCB = options.picker.callback || function(active) {};
+    var clickerCB = options.clicker.callback || function(active) {};
     var wrapper = editor.getWrapperElement();
     wrapper.addEventListener("mousedown", onClick);
+    document.body.addEventListener("mousedown", windowOnClick);
     editor.setOption("onKeyEvent", onKeyDown);
+    var clickerDiv = document.createElement("div");
+    clickerDiv.className = "inlet_clicker";
+    clickerDiv.style.visibility = "hidden";
+    clickerDiv.style.position = "absolute";
+    container.appendChild(clickerDiv);
+    var clicker = document.createElement("input");
+    clicker.className = "checkbox";
+    clicker.setAttribute("type", "checkbox");
+    clicker.addEventListener("change", onClicker);
+    clickerDiv.appendChild(clicker);
+    function onClicker(event) {
+      var value = String(clicker.checked);
+      var cursor = editor.getCursor(true);
+      var boolean = getMatch(cursor, "boolean");
+      if (!boolean) return;
+      var start = {
+        line: cursor.line,
+        ch: boolean.start
+      };
+      var end = {
+        line: cursor.line,
+        ch: boolean.end
+      };
+      editor.replaceRange(value, start, end);
+    }
     var sliderDiv = document.createElement("div");
     sliderDiv.className = "inlet_slider";
     sliderDiv.style.visibility = "hidden";
-    sliderDiv.style.position = "absolute";
+    if (sliderWidth) {
+      sliderDiv.style.width = sliderWidth;
+    }
+    if (fixedContainer) {
+      sliderDiv.style.position = "fixed";
+    } else {
+      sliderDiv.style.position = "absolute";
+    }
     sliderDiv.style.top = 0;
     container.appendChild(sliderDiv);
     var slider = document.createElement("input");
     slider.className = "range";
     slider.setAttribute("type", "range");
     slider.addEventListener("input", onSlide);
-    slider.addEventListener("mouseup", onSlideMouseUp);
+    slider.addEventListener("change", onSlide);
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+    if (!isFirefox) slider.addEventListener("mouseup", onSlideMouseUp);
     sliderDiv.appendChild(slider);
     function onSlide(event) {
       var value = String(slider.value);
@@ -925,6 +969,12 @@ Inlet = function() {
       slider.setAttribute("max", sliderRange.max);
       slider.value = value;
       editor.dragging = false;
+    }
+    var clickTarget;
+    function windowOnClick(evt) {
+      if (evt.target === clickTarget || evt.target === sliderDiv || evt.target === slider || evt.target === clickerDiv || evt.target === clicker) return;
+      sliderDiv.style.visibility = "hidden";
+      clickerDiv.style.visibility = "hidden";
     }
     var LEFT = 37;
     var UP = 38;
@@ -976,19 +1026,23 @@ Inlet = function() {
     };
     picker = new thistle.Picker("#ffffff");
     function onClick(ev) {
+      clickTarget = ev.target;
       var cursor = editor.getCursor(true);
       var token = editor.getTokenAt(cursor);
       cursorOffset = editor.cursorCoords(true, "page");
+      var leftBase = editor.cursorCoords(true, horizontalMode).left;
       var numberMatch = getMatch(cursor, "number");
       var hslMatch = getMatch(cursor, "hsl");
       var hexMatch = getMatch(cursor, "hex");
       var rgbMatch = getMatch(cursor, "rgb");
+      var booleanMatch = getMatch(cursor, "boolean");
       var pickerTop = cursorOffset.top - topOffset;
       if (cursorOffset.top < topBoundary) {
         pickerTop = cursorOffset.top + bottomOffset;
       }
-      var pickerLeft = cursorOffset.left - leftOffset;
+      var pickerLeft = leftBase - leftOffset;
       sliderDiv.style.visibility = "hidden";
+      clickerDiv.style.visibility = "hidden";
       if (hexMatch) {
         var color = hexMatch.string;
         picker = new thistle.Picker(color);
@@ -1027,13 +1081,38 @@ Inlet = function() {
         slider.setAttribute("min", sliderRange.min);
         slider.setAttribute("max", sliderRange.max);
         slider.value = value;
-        var sliderTop = cursorOffset.top - y_offset;
+        var sliderTop = cursorOffset.top - yOffset;
         var sliderStyle = window.getComputedStyle(sliderDiv);
         var sliderWidth = getPixels(sliderStyle.width);
-        var sliderLeft = cursorOffset.left - sliderWidth / 2;
+        var sliderLeft = leftBase - sliderWidth / 2 + xOffset;
         sliderDiv.style.top = sliderTop - 10 + "px";
         sliderDiv.style.left = sliderLeft + "px";
         sliderDiv.style.visibility = "visible";
+      } else if (booleanMatch) {
+        var clickerTop = cursorOffset.top - yOffset;
+        var clickerStyle = window.getComputedStyle(clickerDiv);
+        var clickerWidth = getPixels(clickerStyle.width);
+        var clickerLeft = leftBase - clickerWidth / 2 + xOffset;
+        var value = JSON.parse(booleanMatch.string);
+        if (value) {
+          clickerDiv.removeChild(clicker);
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type", "checkbox");
+          clicker.setAttribute("checked", "checked");
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker);
+        } else {
+          clickerDiv.removeChild(clicker);
+          clicker = document.createElement("input");
+          clicker.className = "checkbox";
+          clicker.setAttribute("type", "checkbox");
+          clicker.addEventListener("change", onClicker);
+          clickerDiv.appendChild(clicker);
+        }
+        clickerDiv.style.top = clickerTop - 3 + "px";
+        clickerDiv.style.left = clickerLeft + "px";
+        clickerDiv.style.visibility = "visible";
       } else {}
     }
     function getSliderRange(value) {
@@ -1065,17 +1144,20 @@ Inlet = function() {
       if (!type) return;
       var re;
       switch (type.toLowerCase()) {
+       case "boolean":
+        re = /true|false/g;
+        break;
        case "hsl":
         re = /hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3}\%)\s*,\s*(\d{1,3}\%)\s*(?:\s*,\s*(\d+(?:\.\d+)?)\s*)?\)/g;
         break;
        case "rgb":
-        re = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/;
+        re = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/g;
         break;
        case "hex":
         re = /#[a-fA-F0-9]{3,6}/g;
         break;
        case "number":
-        re = /[-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+        re = /[-]?\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
         break;
        default:
         throw new Error("invalid match selection");

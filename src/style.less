@@ -4,11 +4,16 @@
  * ColorPicker
  * =========================================================
  * =========================================================
- * 
+ *
  */
+.inlet_clicker {
+  z-index:10;
+}
+
+ // TODO: redo these correctly: https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/
 .inlet_slider {
     opacity: 0.85;
-    
+
     &:hover {
         opacity: 0.98;
     }
@@ -17,10 +22,10 @@
     display: block;
     border-radius: 3px;
     height: 14px;
-    -webkit-box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5); 
-            box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5); 
-            
-            
+    -webkit-box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5);
+            box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5);
+
+
     background-color: #d6d6d6;
     background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(214, 214, 214)), to(rgb(235, 235, 235)));
     background-image: -webkit-linear-gradient(top, rgb(214, 214, 214), rgb(235, 235, 235));
@@ -29,7 +34,7 @@
     background-image: -ms-linear-gradient(top, rgb(214, 214, 214), rgb(235, 235, 235));
     background-image: linear-gradient(top, rgb(214, 214, 214), rgb(235, 235, 235));
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#d6d6d6', EndColorStr='#ebebeb');
-    
+
 
 }
 .inlet_slider .range {
@@ -42,6 +47,18 @@
     -webkit-appearance:none;
     -moz-appearance:none;
 }
+@-moz-document url-prefix() {
+  .inlet_slider input[type="range"] {
+    position: absolute;
+  }
+}
+.inlet_slider input::-moz-range-track {
+  background: none;
+  border: none;
+  outline: none;
+}
+.inlet_slider input::-moz-range-thumb {
+}
 
 .inlet_slider input::-webkit-slider-thumb{
     //cursor: pointer;
@@ -53,15 +70,15 @@
     width:@size;
     height:@size;
     margin-top: -13px;
- 
+
     border-radius: @size / 2;
 
     border: 1px solid black;
     background-color: red;
-    
-    -webkit-box-shadow: 0px 0px 3px 0px rgba(4,4,4,0.4); 
-            box-shadow: 0px 0px 3px 0px rgba(4,4,4,0.4); 
-            
+
+    -webkit-box-shadow: 0px 0px 3px 0px rgba(4,4,4,0.4);
+            box-shadow: 0px 0px 3px 0px rgba(4,4,4,0.4);
+
             background-color: #424242;
             background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(66, 66, 66)), to(rgb(33, 33, 33)));
             background-image: -webkit-linear-gradient(top, rgb(66, 66, 66), rgb(33, 33, 33));
@@ -70,7 +87,7 @@
             background-image: -ms-linear-gradient(top, rgb(66, 66, 66), rgb(33, 33, 33));
             background-image: linear-gradient(top, rgb(66, 66, 66), rgb(33, 33, 33));
             filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#424242', EndColorStr='#212121');
-    
+
 }
 
 /*
@@ -79,7 +96,7 @@
  * ColorPicker
  * =========================================================
  * =========================================================
- * 
+ *
  */
 
 .ColorPicker {
@@ -103,12 +120,12 @@
 	left: 700px;
 	width:229px;
 	z-index:100;
-  
+
   border-radius: 3px;
-  -webkit-box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5); 
-  box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5); 
-            
-          
+  -webkit-box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5);
+  box-shadow:inset 0px 0px 5px 0px rgba(4,4,4,0.5);
+
+
   background-color: rgba(214, 214, 215, 0.85);//#d6d6d6;
   /*
   background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(214, 214, 214)), to(rgb(235, 235, 235)));
@@ -182,5 +199,3 @@
 	text-shadow: 0 0 20px #fff;
 	color:#FF1100;
 }
-
-
