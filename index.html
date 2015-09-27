@@ -34,11 +34,11 @@
     Play with the code in CodeMirror just by clicking on numbers and colors!<br>
 
     <strong><a href="https://github.com/enjalot/Inlet">check out the code</a></strong><br><br>
-    by <strong><a href="http://twitter.com/enjalot">@enjalot</a></strong> and <strong><a href="http://twitter.com/mrejfox">@mrejfox</a></strong>
-    
+    by <strong><a href="http://twitter.com/enjalot">@enjalot</a></strong>, <strong><a href="http://twitter.com/mrejfox">@mrejfox</a></strong> and <strong><a href="http://github.com/georules">@georules</a></strong>
+
     <span id="example">42 === The answer to life, the universe and everything.</div>
   </div>
-  
+
   <div id='editor'>
   </div>
 
@@ -50,7 +50,7 @@
   <script>
     var editor = CodeMirror(document.getElementById("editor"),{
       //default code for example:
-      value: '//Click on the hex value or number below:\n\nvar color = "#D1FFDB"\n\nvar theAnswer = 42;\n\n//Usage looks like:\n//var editor = CodeMirror(...);\n//Inlet(editor);\n\n//You can also use hsl colors, try replacing #D1FFDB with hsl(133,100%,91%)',
+      value: '//Click on the hex value or number below:\n\nvar color = "#D1FFDB"\n\nvar theAnswer = 42;\n\nvar is = true;\n\n//Usage looks like:\n//var editor = CodeMirror(...);\n//Inlet(editor);\n\n//You can also use hsl colors, try replacing #D1FFDB with hsl(133,100%,91%)',
       mode:  "javascript",
       theme: "monokai",
       lineNumbers: true,
@@ -60,7 +60,8 @@
       //let's affect the page when the code changes!
       eval(editor.getValue());
       var example = document.getElementById("example");
-      example.innerHTML = theAnswer + " === The answer to life, the universe and everything.";
+      var isIt = is ? "===" : "!==";
+      example.innerHTML = theAnswer + " " + isIt + " The answer to life, the universe and everything.";
       //example.style.left = x+"px";
       //example.style.top = y+"px";
       document.body.style['background-color'] = color;
@@ -69,7 +70,6 @@
 
     var inlet = Inlet(editor);
   </script>
-    
+
     <!--<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>-->
 </body>
-

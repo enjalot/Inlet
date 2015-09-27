@@ -4,8 +4,11 @@
  * ColorPicker
  * =========================================================
  * =========================================================
- * 
+ *
  */
+.inlet_clicker {
+  z-index: 10;
+}
 .inlet_slider {
   opacity: 0.85;
   z-index: 10;
@@ -36,6 +39,16 @@
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+@-moz-document url-prefix() {
+  .inlet_slider input[type="range"] {
+    position: absolute;
+  }
+}
+.inlet_slider input::-moz-range-track {
+  background: none;
+  border: none;
+  outline: none;
+}
 .inlet_slider input::-webkit-slider-thumb {
   cursor: col-resize;
   -webkit-appearance: none;
@@ -63,7 +76,7 @@
  * ColorPicker
  * =========================================================
  * =========================================================
- * 
+ *
  */
 .ColorPicker {
   /*
