@@ -29,8 +29,8 @@ Inlet = (function() {
     var clickerCB = options.clicker.callback || function(active) {};
 
     var wrapper = editor.getWrapperElement();
-    wrapper.addEventListener("mousedown", onClick);
-    document.body.addEventListener("mousedown", windowOnClick);
+    wrapper.addEventListener("mouseup", onClick);
+    document.body.addEventListener("mouseup", windowOnClick);
     editor.setOption("onKeyEvent", onKeyDown);
 
     //make the clicker
@@ -176,6 +176,10 @@ Inlet = (function() {
 
     //Handle clicks
     function onClick(ev) {
+      // bail out if we were doing a selection and not a click
+      if (editor.somethingSelected()) {
+        return;
+      }
       // we track when we've clicked on a potential number/color for use in the windowOnClick function
       clickTarget = ev.target;
       // we get the cursor and its coordinates for when we need to place the slider/color picker

@@ -87,7 +87,6 @@
 	box-shadow: 2px 2px 5px 2px rgba(0,0,0,0.35);
 	color:#AAA;
   */
-
   text-shadow: 1px 1px 1px #000;
   color: #050505;
   cursor: default;
@@ -113,7 +112,6 @@
   background-image: linear-gradient(top, rgb(214, 214, 214), rgb(235, 235, 235));
   filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#d6d6d6', EndColorStr='#ebebeb');
   */
-
 }
 .ColorPicker br {
   clear: both;
@@ -169,7 +167,6 @@
 	user-select:none;
 	-webkit-user-select: none;
   */
-
 }
 .ColorPicker div.hexClose:hover {
   text-shadow: 0 0 20px #fff;
