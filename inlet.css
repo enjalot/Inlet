@@ -31,9 +31,12 @@
   opacity: 0.98;
 }
 .inlet_slider .range {
-  width: 90%;
-  margin-left: 5%;
+  width: 100%;
+  height: 100%;
+  outline: none;
   margin-top: 0px;
+  margin-left: 0px;
+  border-radius: 3px;
 }
 .inlet_slider input[type="range"] {
   -webkit-appearance: none;
@@ -55,7 +58,6 @@
   -moz-apperance: none;
   width: 12px;
   height: 12px;
-  margin-top: -13px;
   border-radius: 6px;
   border: 1px solid black;
   background-color: red;
